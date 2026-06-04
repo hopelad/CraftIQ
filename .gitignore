@@ -2,6 +2,15 @@
 bin/
 obj/
 
+# Coverage reports
+CoverageReport/
+TestResults/
+
+# Office files (upload manually as releases)
+*.pptx
+*.docx
+*.xlsx
+
 # Database
 *.db
 *.db-shm
