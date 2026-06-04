@@ -1,0 +1,414 @@
+@model CraftIQ.Models.DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+    ViewData["Page"] = "dashboard";
+}
+
+<style>
+    /* ── Page header ── */
+    .dash-header {
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid var(--border);
+    }
+    .dash-greeting {
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: var(--dark);
+        letter-spacing: -.02em;
+        margin-bottom: .3rem;
+    }
+    .dash-sub {
+        font-size: .84rem;
+        color: var(--muted);
+    }
+
+    /* ── Stats row ── */
+    .dash-stats {
+        display: flex;
+        gap: .85rem;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+    }
+    .stat-card {
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: .9rem 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: .75rem;
+        min-width: 160px;
+    }
+    .stat-icon {
+        width: 34px; height: 34px;
+        border-radius: 7px;
+        background: var(--accent-light);
+        display: flex; align-items: center; justify-content: center;
+        font-size: .8rem; color: var(--accent); flex-shrink: 0;
+    }
+    .stat-label {
+        font-size: .7rem;
+        color: var(--muted);
+        margin-bottom: .12rem;
+        font-weight: 500;
+    }
+    .stat-value {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--dark);
+        letter-spacing: -.02em;
+        line-height: 1;
+    }
+    .stat-change {
+        font-size: .68rem;
+        color: var(--green);
+        font-weight: 500;
+        margin-top: .1rem;
+    }
+
+    /* ── Section label ── */
+    .section-label {
+        font-size: .68rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .1em;
+        color: var(--tan);
+        margin-bottom: .85rem;
+    }
+
+    /* ── Tool grid ── */
+    .tool-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: .85rem;
+        margin-bottom: 2rem;
+    }
+
+    .tool-card {
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        transition: border-color .15s, box-shadow .15s;
+        cursor: default;
+    }
+    .tool-card:hover {
+        border-color: #C7D2FE;
+        box-shadow: 0 2px 8px rgba(94,106,210,.08);
+    }
+
+    .tool-card-icon {
+        width: 40px; height: 40px;
+        border-radius: 9px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1rem;
+        margin-bottom: 1rem;
+        flex-shrink: 0;
+    }
+
+    .tool-card-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--dark);
+        letter-spacing: -.02em;
+        margin-bottom: .4rem;
+    }
+
+    .tool-card-desc {
+        font-size: .81rem;
+        color: var(--muted);
+        line-height: 1.65;
+        flex: 1;
+        margin-bottom: 1.1rem;
+    }
+
+    .tool-card-feats {
+        display: flex;
+        flex-direction: column;
+        gap: .28rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .tool-feat {
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+        font-size: .77rem;
+        color: var(--muted);
+    }
+
+    .feat-dot {
+        width: 5px; height: 5px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+
+    .tool-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: .35rem;
+        padding: .5rem 1rem;
+        border-radius: 6px;
+        font-size: .78rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: background .12s;
+        border: none;
+        cursor: pointer;
+        font-family: var(--sans);
+        align-self: flex-start;
+        letter-spacing: -.01em;
+    }
+    .tool-btn-accent {
+        background: var(--accent); color: #fff;
+    }
+    .tool-btn-accent:hover { background: var(--accent-hover); color: #fff; }
+
+    .tool-btn-dark {
+        background: var(--dark); color: #fff;
+    }
+    .tool-btn-dark:hover { background: var(--charcoal); color: #fff; }
+
+    /* ── Bottom row ── */
+    .dash-bottom {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: .85rem;
+    }
+
+    .dash-card {
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 1.25rem;
+    }
+
+    .dash-card-title {
+        font-size: .8rem;
+        font-weight: 700;
+        color: var(--dark);
+        letter-spacing: -.01em;
+        margin-bottom: 1rem;
+    }
+
+    .act-item {
+        display: flex;
+        align-items: center;
+        gap: .7rem;
+        padding: .55rem 0;
+        border-bottom: 1px solid var(--border);
+    }
+    .act-item:last-child { border-bottom: none; padding-bottom: 0; }
+
+    .act-icon {
+        width: 30px; height: 30px;
+        border-radius: 7px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: .72rem; flex-shrink: 0;
+    }
+
+    .act-name {
+        font-size: .8rem;
+        font-weight: 500;
+        color: var(--dark);
+    }
+    .act-file {
+        font-size: .7rem;
+        color: var(--muted);
+        font-family: var(--mono);
+    }
+    .act-time {
+        font-size: .7rem;
+        color: var(--tan);
+        white-space: nowrap;
+        margin-left: auto;
+        font-family: var(--mono);
+    }
+
+    @@media (max-width: 1100px) {
+        .tool-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @@media (max-width: 700px) {
+        .tool-grid { grid-template-columns: 1fr; }
+        .dash-stats { gap: .6rem; }
+    }
+</style>
+
+<!-- Page header -->
+<div class="dash-header">
+    <div class="dash-greeting">
+        Good day, @User.Identity?.Name
+    </div>
+    <div class="dash-sub">Choose a tool to start building something great.</div>
+</div>
+
+<!-- Stats -->
+<div class="dash-stats">
+    <div class="stat-card">
+        <div class="stat-icon">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <rect x="1" y="7" width="3" height="6" rx="1" fill="currentColor"/>
+                <rect x="5.5" y="4" width="3" height="9" rx="1" fill="currentColor"/>
+                <rect x="10" y="1" width="3" height="12" rx="1" fill="currentColor"/>
+            </svg>
+        </div>
+        <div>
+            <div class="stat-label">Total documents</div>
+            <div class="stat-value">@Model.TotalDocuments</div>
+            @if (Model.DocumentsThisWeek > 0)
+            {
+                <div class="stat-change">+@Model.DocumentsThisWeek this week</div>
+            }
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background:var(--green-light);color:var(--green);">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M2 7.5l3.5 3.5L12 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </div>
+        <div>
+            <div class="stat-label">CVs generated</div>
+            <div class="stat-value">@Model.CVsGenerated</div>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background:#eff6ff;color:#1d4ed8;">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <rect x="1" y="1" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M4 5h6M4 7.5h4M4 10h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+        </div>
+        <div>
+            <div class="stat-label">Analysis reports</div>
+            <div class="stat-value">@Model.AnalysisReports</div>
+        </div>
+    </div>
+</div>
+
+<!-- Tools -->
+<div class="section-label">Tools</div>
+<div class="tool-grid">
+
+    <div class="tool-card">
+        <div class="tool-card-icon" style="background:#F0FDF4;">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                <rect x="2" y="2" width="14" height="14" rx="2" stroke="#10B981" stroke-width="1.5"/>
+                <path d="M5 9h8M5 6h5M5 12h6" stroke="#10B981" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+        </div>
+        <div class="tool-card-title">CV Builder</div>
+        <div class="tool-card-desc">Create a professional CV powered by AI — upload an existing CV or fill in your details from scratch.</div>
+        <div class="tool-card-feats">
+            <div class="tool-feat">
+                <div class="feat-dot" style="background:var(--green);"></div>
+                10 professional templates
+            </div>
+            <div class="tool-feat">
+                <div class="feat-dot" style="background:var(--green);"></div>
+                AI-powered content generation
+            </div>
+            <div class="tool-feat">
+                <div class="feat-dot" style="background:var(--green);"></div>
+                ATS analysis &amp; job matching
+            </div>
+            <div class="tool-feat">
+                <div class="feat-dot" style="background:var(--green);"></div>
+                Export as PDF or DOCX
+            </div>
+        </div>
+        <a href="/Home/CVBuilder" class="tool-btn tool-btn-accent">Open CV Builder &rarr;</a>
+    </div>
+
+    <div class="tool-card">
+        <div class="tool-card-icon" style="background:#F5F3FF;">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                <path d="M3 3h12v2H3zM3 7h12M3 10.5h8" stroke="#5E6AD2" stroke-width="1.5" stroke-linecap="round"/>
+                <circle cx="13" cy="13" r="3" stroke="#5E6AD2" stroke-width="1.5"/>
+                <path d="M15.5 15.5l1.5 1.5" stroke="#5E6AD2" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+        </div>
+        <div class="tool-card-title">Code Refactoring</div>
+        <div class="tool-card-desc">Analyze C/C++ code for code smells, receive AI-powered refactoring suggestions, and improve code quality.</div>
+        <div class="tool-card-feats">
+            <div class="tool-feat">
+                <div class="feat-dot" style="background:var(--accent);"></div>
+                Detect code smells
+            </div>
+            <div class="tool-feat">
+                <div class="feat-dot" style="background:var(--accent);"></div>
+                AI-powered refactoring
+            </div>
+            <div class="tool-feat">
+                <div class="feat-dot" style="background:var(--accent);"></div>
+                Detailed improvement explanations
+            </div>
+            <div class="tool-feat">
+                <div class="feat-dot" style="background:var(--accent);"></div>
+                Cleaner, faster output
+            </div>
+        </div>
+        <a href="/Home/Refactor" class="tool-btn tool-btn-dark">Open Refactor Tool &rarr;</a>
+    </div>
+
+    <div class="tool-card">
+        <div class="tool-card-icon" style="background:#EFF6FF;">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                <rect x="2" y="2" width="14" height="14" rx="2" stroke="#1D4ED8" stroke-width="1.5"/>
+                <path d="M5 7h8M5 10h6M5 13h4" stroke="#1D4ED8" stroke-width="1.5" stroke-linecap="round"/>
+                <circle cx="13.5" cy="5.5" r="2" fill="#1D4ED8" opacity=".7"/>
+            </svg>
+        </div>
+        <div class="tool-card-title">Career Intelligence Center</div>
+        <div class="tool-card-desc">Analyze your CV or Cover Letter with AI — ATS scoring, job matching, recruiter feedback, and more.</div>
+        <div class="tool-card-feats">
+            <div class="tool-feat"><div class="feat-dot" style="background:#1D4ED8;"></div>ATS &amp; job match analysis</div>
+            <div class="tool-feat"><div class="feat-dot" style="background:#1D4ED8;"></div>Recruiter &amp; resume review</div>
+            <div class="tool-feat"><div class="feat-dot" style="background:#1D4ED8;"></div>Upload PDF / DOCX / image</div>
+            <div class="tool-feat"><div class="feat-dot" style="background:#1D4ED8;"></div>Save analysis reports</div>
+        </div>
+        <a href="/Home/CareerIntelligence" class="tool-btn" style="background:#1D4ED8;color:#fff;">Open Analysis &rarr;</a>
+    </div>
+
+</div>
+
+<!-- Bottom row -->
+<div class="dash-bottom">
+    <div class="dash-card">
+        <div class="dash-card-title">Recent activity</div>
+        @if (Model.RecentActivity.Count == 0)
+        {
+            <div style="padding:.75rem 0;font-size:.8rem;color:var(--muted);">
+                No documents yet. <a href="/Home/CVBuilder" style="color:var(--accent);text-decoration:none;font-weight:500;">Build your first CV &rarr;</a>
+            </div>
+        }
+        else
+        {
+            foreach (var item in Model.RecentActivity)
+            {
+                <div class="act-item">
+                    <div class="act-icon" style="background:#F5F3FF;color:var(--accent);">
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                            <rect x="1" y="1" width="10" height="10" rx="1.5" stroke="currentColor" stroke-width="1.3"/>
+                            <path d="M3 6h6M3 4h4M3 8h5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <div style="flex:1;min-width:0;">
+                        <div class="act-name">@item.Title</div>
+                        <div class="act-file">@(item.Status == "complete" ? "Complete" : "Draft")</div>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:.6rem;flex-shrink:0;">
+                        <span class="act-time">@item.RelativeTime</span>
+                        <a href="@item.ReopenUrl"
+                           style="font-size:.7rem;font-weight:500;color:var(--accent);text-decoration:none;padding:.2rem .5rem;border:1px solid #C7D2FE;border-radius:4px;white-space:nowrap;">
+                            @(item.Status == "complete" ? "Open" : "Continue")
+                        </a>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>

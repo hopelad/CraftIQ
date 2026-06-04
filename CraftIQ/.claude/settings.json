@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Stop-Process -Id 43976 -Force -ErrorAction SilentlyContinue)",
+      "PowerShell(Get-NetTCPConnection -LocalPort 5058 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess | ForEach-Object { Stop-Process -Id $_ -Force -ErrorAction SilentlyContinue }; Start-Sleep -Seconds 1; Write-Output \"Port 5058 cleared\")",
+      "Bash(Get-ChildItem \"c:\\\\Users\\\\HoPeLaD\\\\OneDrive\\\\Desktop\\\\CraftIQ_for_Dep\\\\CraftIQ\" -Recurse)",
+      "Bash(Measure-Object)",
+      "PowerShell(Get-ChildItem \"c:\\\\Users\\\\HoPeLaD\\\\OneDrive\\\\Desktop\\\\CraftIQ_for_Dep\\\\CraftIQ.Tests\" -Recurse | Select-Object Name, DirectoryName | Where-Object { $_.Name -match \"\\\\.\\(cs|csproj\\)$\" })",
+      "PowerShell(Start-Process \"c:\\\\Users\\\\HoPeLaD\\\\OneDrive\\\\Desktop\\\\CraftIQ_for_Dep\\\\CraftIQ\\\\architecture.html\")",
+      "PowerShell(Stop-Process -Id 17248 -Force -ErrorAction SilentlyContinue)",
+      "PowerShell(Stop-Process -Id 44488 -Force -ErrorAction SilentlyContinue)",
+      "PowerShell(Get-Process -Name \"CraftIQ\" -ErrorAction SilentlyContinue)",
+      "PowerShell(Stop-Process -Force)",
+      "PowerShell($pids = \\(netstat -ano | Select-String \":5058\"\\).ToString\\(\\).Trim\\(\\).Split\\(\" \"\\)[-1] | Select-Object -Unique; foreach \\($p in $pids\\) { Stop-Process -Id $p -Force -ErrorAction SilentlyContinue }; Get-Process -Name \"CraftIQ\",\"dotnet\" -ErrorAction SilentlyContinue | Stop-Process -Force; Write-Host \"All killed\")",
+      "PowerShell(Get-Process -Name \"CraftIQ\",\"dotnet\" -ErrorAction SilentlyContinue)",
+      "PowerShell(Get-Process -Name \"CraftIQ\",\"dotnet\" -ErrorAction SilentlyContinue | ForEach-Object { Write-Host \"Killing PID $\\($_.Id\\) - $\\($_.Name\\)\" ; $_ | Stop-Process -Force }; Write-Host \"Done\")"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\HoPeLaD\\OneDrive\\Desktop\\CraftIQ_for_Dep\\CraftIQ.Tests"
+    ]
+  }
+}

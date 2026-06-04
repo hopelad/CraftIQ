@@ -1,0 +1,278 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - CraftIQ</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <style>
+        /* ── Layout behavior overrides (sidebar-hidden, responsive grids) ── */
+
+        .sidebar-hidden .sidebar      { width: 0; transform: translateX(-100%); }
+        .sidebar-hidden .app-topbar   { left: 0; }
+        .sidebar-hidden .app-content  { margin-left: 0; }
+
+        /* Hamburger lines */
+        .topbar-hamburger {
+            display: flex; flex-direction: column; justify-content: center;
+            gap: 4px; width: 32px; height: 32px; padding: 6px;
+            background: none; border: none; cursor: pointer;
+            border-radius: 6px; flex-shrink: 0; transition: background .12s;
+        }
+        .topbar-hamburger:hover { background: var(--surface); }
+        .topbar-hamburger span  { display: block; height: 1.5px; background: var(--muted); border-radius: 2px; }
+
+        /* Topbar sign-out button */
+        .topbar-logout {
+            font-size: .75rem; font-weight: 500; color: var(--muted);
+            background: none; border: 1px solid var(--border); border-radius: 6px;
+            padding: .3rem .75rem; cursor: pointer; transition: border-color .12s, color .12s;
+            font-family: var(--sans);
+        }
+        .topbar-logout:hover { border-color: var(--red); color: var(--red); }
+
+        /* Mobile close button */
+        .sidebar-close-btn {
+            display: none; position: absolute; top: .75rem; right: .75rem;
+            width: 26px; height: 26px; background: rgba(255,255,255,.08);
+            border: none; border-radius: 5px; color: #94A3B8;
+            font-size: .8rem; align-items: center; justify-content: center;
+            cursor: pointer; z-index: 10;
+        }
+
+        /* Overlay */
+        .sidebar-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,.45); z-index: 299;
+            opacity: 0; transition: opacity .2s; pointer-events: none;
+        }
+        .sidebar-overlay.visible { opacity: 1; pointer-events: all; }
+
+        @@media (min-width: 769px) and (max-width: 1024px) {
+            .sidebar { width: 200px; }
+            .app-topbar { left: 200px; }
+            .app-content { margin-left: 200px; }
+            .sidebar-hidden .app-topbar { left: 0; }
+            .sidebar-hidden .app-content { margin-left: 0; }
+            .app-inner { padding: 1.25rem 1.5rem; }
+        }
+
+        @@media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); width: 220px !important; }
+            .sidebar.mobile-open { transform: translateX(0); }
+            .sidebar-overlay { display: block; }
+            .sidebar-close-btn { display: flex; }
+            .app-topbar { left: 0 !important; }
+            .app-content { margin-left: 0 !important; }
+            .app-inner { padding: 1rem; }
+        }
+
+        @@media (max-width: 960px) {
+            .builder-layout, .cv-main-layout, .cl-main-layout { grid-template-columns: 1fr !important; }
+            .preview-panel, .cv-preview-panel, .cl-preview-panel { position: static !important; }
+            .fr { grid-template-columns: 1fr !important; }
+        }
+
+        @@media (max-width: 600px) {
+            .upload-row { flex-direction: column; }
+            .upload-row .btn-upload { width: 100%; justify-content: center; }
+            .photo-row { flex-direction: column; align-items: flex-start; }
+            .builder-topbar { flex-direction: column; align-items: flex-start; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-wrap" id="appWrap">
+
+        <!-- Mobile overlay -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+        <!-- ── Sidebar ── -->
+        <aside class="sidebar" id="sidebar">
+
+            <button class="sidebar-close-btn" id="sidebarClose" type="button">&#10005;</button>
+
+            <a class="sidebar-logo" href="/">
+                <div class="sidebar-logo-mark">&lt;/&gt;</div>
+                <span class="sidebar-logo-text">Craft<em>IQ</em></span>
+            </a>
+
+            <nav class="sidebar-nav">
+                <div class="sidebar-section-label" style="padding-top:.9rem;">Menu</div>
+
+                <a href="/Home/Index"
+                   class="@(ViewData["Page"]?.ToString() == "dashboard" ? "active" : "")">
+                    <span class="nav-icon">&#9633;</span>
+                    <span>Dashboard</span>
+                </a>
+
+                <a href="/Home/Refactor"
+                   class="@(ViewData["Page"]?.ToString() == "refactor" ? "active" : "")">
+                    <span class="nav-icon">&lt;/&gt;</span>
+                    <span>Refactor Tool</span>
+                </a>
+
+                <a href="/Home/CVBuilder"
+                   class="@(ViewData["Page"]?.ToString() == "cvbuilder" ? "active" : "")">
+                    <span class="nav-icon">&#128196;</span>
+                    <span>CV Builder</span>
+                </a>
+
+                <a href="/Home/CareerIntelligence"
+                   class="@(ViewData["Page"]?.ToString() == "cic" ? "active" : "")">
+                    <span class="nav-icon">&#127919;</span>
+                    <span>Analysis</span>
+                </a>
+
+                <div class="sidebar-sep"></div>
+                <div class="sidebar-section-label">Account</div>
+
+                <a href="/Home/History"
+                   class="@(ViewData["Page"]?.ToString() == "history" ? "active" : "")">
+                    <span class="nav-icon">&#9711;</span>
+                    <span>History</span>
+                </a>
+                <a href="#">
+                    <span class="nav-icon">&#9881;</span>
+                    <span>Settings</span>
+                </a>
+
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <form method="post" asp-action="Logout"
+                          asp-controller="Home" style="margin:0">
+                        @Html.AntiForgeryToken()
+                        <button type="submit">
+                            <span class="nav-icon">&#8592;</span>
+                            <span>Sign out</span>
+                        </button>
+                    </form>
+                }
+            </nav>
+
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <div class="sidebar-bottom">
+                    <div class="sidebar-user">
+                        <div class="sidebar-avatar">
+                            @(User.Identity?.Name?.Substring(0, 1).ToUpper())
+                        </div>
+                        <span class="sidebar-username">@User.Identity?.Name</span>
+                    </div>
+                </div>
+            }
+        </aside>
+
+        <!-- ── Topbar ── -->
+        <header class="app-topbar" id="appTopbar">
+            <div class="topbar-left">
+                <button class="topbar-hamburger" id="sidebarToggle"
+                        type="button" title="Toggle sidebar">
+                    <span></span><span></span><span></span>
+                </button>
+                <div class="topbar-title">@ViewData["Title"]</div>
+            </div>
+            <div class="topbar-right">
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <form method="post" asp-action="Logout"
+                          asp-controller="Home" style="margin:0">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="topbar-logout">Sign out</button>
+                    </form>
+                }
+            </div>
+        </header>
+
+        <!-- ── Main content ── -->
+        <main class="app-content" id="appContent">
+            <div class="app-inner">
+                @RenderBody()
+            </div>
+        </main>
+
+    </div>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+
+    <script>
+        (function () {
+            var wrap     = document.getElementById("appWrap");
+            var sidebar  = document.getElementById("sidebar");
+            var overlay  = document.getElementById("sidebarOverlay");
+            var toggle   = document.getElementById("sidebarToggle");
+            var closeBtn = document.getElementById("sidebarClose");
+
+            // ── Clear any stale state ──
+            try { localStorage.clear(); } catch(e) {}
+
+            // ── Full screen pages — sidebar completely hidden ──
+            var fullScreenPages = ["cvbuilder", "coverletter", "refactor"];
+            var currentPage     = "@(ViewData["Page"]?.ToString() ?? "")";
+            var isFullScreen    = fullScreenPages.indexOf(currentPage) >= 0;
+
+            function isMobile() { return window.innerWidth <= 768; }
+
+            if (!isMobile()) {
+                if (isFullScreen) {
+                    wrap.classList.add("sidebar-hidden");
+                    wrap.classList.remove("sidebar-visible");
+                } else {
+                    wrap.classList.remove("sidebar-hidden");
+                }
+            }
+
+            sidebar.classList.remove("mobile-open");
+
+            function openMobile() {
+                sidebar.classList.add("mobile-open");
+                overlay.classList.add("visible");
+                document.body.style.overflow = "hidden";
+            }
+
+            function closeMobile() {
+                sidebar.classList.remove("mobile-open");
+                overlay.classList.remove("visible");
+                document.body.style.overflow = "";
+            }
+
+            if (toggle) {
+                toggle.addEventListener("click", function () {
+                    if (isMobile()) {
+                        sidebar.classList.contains("mobile-open")
+                            ? closeMobile() : openMobile();
+                    } else {
+                        // Desktop toggle — show/hide sidebar
+                        wrap.classList.toggle("sidebar-hidden");
+                    }
+                });
+            }
+
+            if (closeBtn) closeBtn.addEventListener("click", closeMobile);
+            if (overlay)  overlay.addEventListener("click",  closeMobile);
+
+            if (sidebar) {
+                sidebar.querySelectorAll("a").forEach(function (a) {
+                    a.addEventListener("click", function () {
+                        if (isMobile()) closeMobile();
+                    });
+                });
+            }
+
+            window.addEventListener("resize", function () {
+                if (!isMobile()) {
+                    closeMobile();
+                    document.body.style.overflow = "";
+                }
+            });
+        })();
+    </script>
+
+</body>
+</html>

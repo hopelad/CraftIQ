@@ -1,0 +1,1058 @@
+﻿@{
+    ViewData["Title"] = "Refactor Tool";
+    ViewData["Page"] = "refactor";
+}
+
+<style>
+    .rf-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 1.75rem;
+        padding-bottom: 1.4rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .rf-top-left {
+        display: flex;
+        align-items: center;
+        gap: .9rem;
+    }
+
+    .rf-top-icon {
+        width: 46px;
+        height: 46px;
+        border-radius: 12px;
+        background: var(--accent-light);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.15rem;
+    }
+
+    .rf-top-title {
+        font-family: var(--serif);
+        font-weight: 700;
+        font-size: 1.2rem;
+        color: var(--dark);
+        letter-spacing: -.01em;
+        margin-bottom: .15rem;
+    }
+
+    .rf-top-sub {
+        font-size: .8rem;
+        color: var(--muted);
+    }
+
+    .rf-top-actions {
+        display: flex;
+        gap: .65rem;
+    }
+
+    .btn-sm-ghost {
+        display: flex;
+        align-items: center;
+        gap: .35rem;
+        padding: .45rem .95rem;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: var(--warm-white);
+        color: var(--muted);
+        font-size: .8rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all .2s;
+        font-family: var(--sans);
+        text-decoration: none;
+    }
+
+        .btn-sm-ghost:hover {
+            border-color: var(--tan);
+            color: var(--dark);
+        }
+
+    /* ── Editors: side by side ── */
+    .rf-editors {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.25rem;
+        margin-bottom: 1.25rem;
+        position: relative;
+    }
+
+    .rf-card {
+        background: var(--warm-white);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        overflow: hidden;
+        transition: border-color .2s;
+    }
+
+        .rf-card:hover {
+            border-color: var(--tan);
+        }
+
+    .rf-card-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: .7rem 1rem;
+        border-bottom: 1px solid var(--border);
+        background: var(--paper);
+    }
+
+    .rf-card-label {
+        display: flex;
+        align-items: center;
+        gap: .6rem;
+        font-size: .78rem;
+        font-weight: 500;
+        color: var(--charcoal);
+        font-family: var(--mono);
+    }
+
+    .rf-card-num {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: var(--dark);
+        color: var(--cream);
+        font-size: .62rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--sans);
+    }
+
+    .rf-lang {
+        font-size: .7rem;
+        font-family: var(--mono);
+        background: var(--accent-light);
+        color: var(--accent);
+        border-radius: 5px;
+        padding: .1rem .45rem;
+    }
+
+    .rf-editor-box {
+        height: 420px;
+    }
+
+    .rf-card-foot {
+        padding: .6rem 1rem;
+        border-top: 1px solid var(--border);
+        background: var(--paper);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .rf-foot-note {
+        font-size: .72rem;
+        color: var(--tan);
+        font-family: var(--mono);
+    }
+
+    /* ── Center arrow between editors ── */
+    .rf-center-arrow {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 5;
+        background: var(--paper);
+        border: 1px solid var(--border);
+        border-radius: 100px;
+        padding: .28rem .75rem;
+        font-family: var(--mono);
+        font-size: .68rem;
+        color: var(--tan);
+        white-space: nowrap;
+        pointer-events: none;
+    }
+
+    /* ── Single refactor button ── */
+    .rf-action {
+        margin-bottom: 1.5rem;
+        display: flex;
+        justify-content: center;
+    }
+
+    .rf-main-btn {
+        display: flex;
+        align-items: center;
+        gap: .6rem;
+        padding: .8rem 2.5rem;
+        background: var(--dark);
+        color: var(--cream);
+        border: none;
+        border-radius: 10px;
+        font-family: var(--serif);
+        font-weight: 600;
+        font-size: .95rem;
+        cursor: pointer;
+        box-shadow: 0 3px 14px rgba(44,36,22,.18);
+        transition: all .2s;
+        letter-spacing: -.01em;
+    }
+
+        .rf-main-btn:hover {
+            background: var(--charcoal);
+            transform: translateY(-1px);
+            box-shadow: 0 5px 20px rgba(44,36,22,.22);
+        }
+
+        .rf-main-btn:disabled {
+            opacity: .6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+    /* ── Output ── */
+    .rf-output {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.25rem;
+    }
+
+    .rf-out-card {
+        background: var(--warm-white);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        overflow: hidden;
+    }
+
+    .rf-out-body {
+        padding: 1.25rem;
+        min-height: 200px;
+        font-size: .855rem;
+    }
+
+    /* ── Empty states ── */
+    .rf-empty {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 160px;
+        gap: .6rem;
+    }
+
+    .rf-empty-ico {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        background: var(--paper);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+    }
+
+    .rf-empty-txt {
+        font-size: .8rem;
+        color: var(--tan);
+        font-family: var(--mono);
+    }
+
+    /* ── Smell badge ── */
+    .smell-count {
+        font-size: .7rem;
+        font-weight: 600;
+        background: #fef2f2;
+        color: var(--red);
+        border-radius: 100px;
+        padding: .1rem .55rem;
+    }
+
+    /* ── Smell cards ── */
+    .smell-items {
+        display: flex;
+        flex-direction: column;
+        gap: .65rem;
+    }
+
+    .smell-row {
+        display: flex;
+        align-items: flex-start;
+        gap: .85rem;
+        padding: 1rem 1.1rem;
+        background: var(--paper);
+        border: 1px solid var(--border);
+        border-radius: 11px;
+        transition: border-color .2s;
+    }
+
+        .smell-row:hover {
+            border-color: var(--tan);
+        }
+
+    .smell-num {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: var(--dark);
+        color: var(--cream);
+        font-size: .65rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        margin-top: .15rem;
+        font-family: var(--mono);
+    }
+
+    .smell-body {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: .45rem;
+    }
+
+    .smell-title-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: .75rem;
+        flex-wrap: wrap;
+    }
+
+    .smell-title {
+        font-size: .88rem;
+        font-weight: 600;
+        color: var(--dark);
+        letter-spacing: -.01em;
+    }
+
+    .smell-meta-row {
+        display: flex;
+        align-items: center;
+        gap: .65rem;
+        flex-wrap: wrap;
+    }
+
+    .smell-category {
+        font-size: .72rem;
+        font-family: var(--mono);
+        color: var(--muted);
+        background: var(--sand);
+        border-radius: 5px;
+        padding: .1rem .45rem;
+    }
+
+    .smell-line {
+        font-size: .72rem;
+        font-family: var(--mono);
+        color: var(--accent);
+        background: var(--accent-light);
+        border-radius: 5px;
+        padding: .1rem .45rem;
+        font-weight: 600;
+    }
+
+    .smell-section-label {
+        font-size: .67rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .09em;
+        color: var(--tan);
+        font-family: var(--mono);
+        margin-top: .25rem;
+    }
+
+    .smell-reason {
+        font-size: .82rem;
+        color: var(--charcoal);
+        line-height: 1.6;
+    }
+
+    .smell-impact {
+        font-size: .8rem;
+        color: #92400e;
+        line-height: 1.55;
+        background: #fefce8;
+        border-radius: 6px;
+        padding: .4rem .65rem;
+        border-left: 3px solid #fde68a;
+    }
+
+    .smell-fix {
+        font-size: .8rem;
+        color: #065f46;
+        line-height: 1.55;
+        background: #f0fdf4;
+        border-radius: 6px;
+        padding: .4rem .65rem;
+        border-left: 3px solid #86efac;
+        font-family: var(--mono);
+    }
+
+    .sev-pill {
+        font-size: .67rem;
+        font-weight: 600;
+        border-radius: 100px;
+        padding: .15rem .55rem;
+        white-space: nowrap;
+        font-family: var(--mono);
+    }
+
+    .sev-h {
+        background: #fef2f2;
+        color: var(--red);
+    }
+
+    .sev-m {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .sev-l {
+        background: #f0fdf4;
+        color: var(--green);
+    }
+
+    /* ── Explanation ── */
+    .exp-items {
+        display: flex;
+        flex-direction: column;
+        gap: .55rem;
+    }
+
+    .exp-row {
+        display: flex;
+        gap: .65rem;
+        padding: .75rem .85rem;
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        border-radius: 9px;
+    }
+
+    .exp-tick {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: var(--green);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: .55rem;
+        flex-shrink: 0;
+        margin-top: .1rem;
+    }
+
+    .exp-txt {
+        font-size: .8rem;
+        color: #065f46;
+        line-height: 1.55;
+    }
+
+        .exp-txt strong {
+            font-weight: 600;
+        }
+
+    .rf-tip {
+        display: flex;
+        align-items: flex-start;
+        gap: .65rem;
+        background: #fefce8;
+        border: 1px solid #fde68a;
+        border-radius: 9px;
+        padding: .75rem .9rem;
+        margin-top: .85rem;
+        font-size: .78rem;
+        color: #92400e;
+        line-height: 1.5;
+    }
+
+    /* ── Code description card ── */
+    .rf-desc-card {
+        display: none;
+        background: var(--warm-white);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        overflow: hidden;
+        margin-bottom: 1.25rem;
+    }
+
+    .rf-desc-body {
+        padding: 1rem 1.25rem;
+        font-size: .88rem;
+        color: var(--charcoal);
+        line-height: 1.75;
+    }
+
+    /* ── Already-clean banner (inside smell panel) ── */
+    .rf-clean-banner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 160px;
+        gap: .45rem;
+        text-align: center;
+        padding: 1rem;
+    }
+
+    .rf-clean-title {
+        font-size: .92rem;
+        font-weight: 700;
+        color: var(--green);
+        font-family: var(--serif);
+    }
+
+    .rf-clean-sub {
+        font-size: .78rem;
+        color: var(--muted);
+        font-family: var(--mono);
+    }
+
+    /* ── Spinner ── */
+    .spinner {
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        border: 2px solid rgba(250,248,244,.3);
+        border-top-color: var(--cream);
+        animation: spin .6s linear infinite;
+        flex-shrink: 0;
+    }
+
+    @@keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    @@media (max-width: 960px) {
+        .rf-editors {
+            grid-template-columns: 1fr;
+        }
+
+        .rf-center-arrow {
+            display: none;
+        }
+
+        .rf-output {
+            grid-template-columns: 1fr;
+        }
+
+        .rf-top {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    }
+</style>
+
+<input id="fileInput" type="file" accept=".c,.cpp,.cc,.cxx,.h,.hpp,.hh" hidden />
+
+<!-- Header -->
+<div class="rf-top">
+    <div class="rf-top-left">
+        <div class="rf-top-icon">&lt;/&gt;</div>
+        <div>
+            <div class="rf-top-title">Refactor Tool</div>
+            <div class="rf-top-sub">Improve your C/C++ code quality — clean, readable, efficient.</div>
+        </div>
+    </div>
+    <div class="rf-top-actions">
+        <button id="uploadBtn" class="btn-sm-ghost" type="button">↑ Upload</button>
+        <button id="clearBtn" class="btn-sm-ghost" type="button">✕ Clear</button>
+    </div>
+</div>
+
+<!-- Editors: side by side -->
+<div class="rf-editors">
+
+    <!-- Input -->
+    <div class="rf-card">
+        <div class="rf-card-head">
+            <div class="rf-card-label">
+                <span class="rf-card-num">1</span> Code Input
+            </div>
+            <span class="rf-lang">C / C++</span>
+        </div>
+        <div id="editor" class="rf-editor-box"></div>
+        <div class="rf-card-foot">
+            <button id="clearBtn2" class="btn-sm-ghost" type="button"
+                    style="font-size:.73rem;padding:.3rem .75rem;">
+                ✕ Clear
+            </button>
+            <span class="rf-foot-note">Paste or upload your source file</span>
+        </div>
+    </div>
+
+    <!-- Center arrow label -->
+    <div class="rf-center-arrow">→</div>
+
+    <!-- Output -->
+    <div class="rf-card">
+        <div class="rf-card-head">
+            <div class="rf-card-label">
+                <span class="rf-card-num">2</span> Refactored Output
+            </div>
+            <span class="rf-lang">C / C++</span>
+        </div>
+        <div id="refEditor" class="rf-editor-box"></div>
+        <div class="rf-card-foot">
+            <span class="rf-foot-note">Read-only — AI output</span>
+            <button id="copyRefBtn" class="btn-sm-ghost" type="button"
+                    style="font-size:.73rem;padding:.3rem .75rem;display:flex;align-items:center;gap:.35rem;">
+                ⎘ Copy
+            </button>
+        </div>
+    </div>
+
+</div>
+
+<!-- Single refactor button -->
+<div class="rf-action" style="flex-direction:column;align-items:center;gap:.55rem;">
+    <button id="refactorBtn" class="rf-main-btn" type="button">
+        ✨ Refactor Code
+    </button>
+    <div id="rfValidMsg" style="display:none;font-size:.79rem;color:var(--red);font-family:var(--mono);text-align:center;"></div>
+</div>
+
+<!-- What this code does -->
+<div class="rf-desc-card" id="descCard">
+    <div class="rf-card-head">
+        <div class="rf-card-label">📋 What This Code Does</div>
+    </div>
+    <div class="rf-desc-body" id="descText"></div>
+</div>
+
+<!-- Smells + Explanation -->
+<div class="rf-output">
+    <div class="rf-out-card">
+        <div class="rf-card-head">
+            <div class="rf-card-label">🐛 Code Smells Detected</div>
+            <span id="smellBadge" style="display:none;" class="smell-count">0 issues</span>
+        </div>
+        <div class="rf-out-body" id="smellList">
+            <div class="rf-empty">
+                <div class="rf-empty-ico">🐛</div>
+                <span class="rf-empty-txt">No smells detected yet</span>
+            </div>
+        </div>
+    </div>
+    <div class="rf-out-card">
+        <div class="rf-card-head">
+            <div class="rf-card-label">ℹ Explanation</div>
+        </div>
+        <div class="rf-out-body" id="expList">
+            <div class="rf-empty">
+                <div class="rf-empty-ico">💡</div>
+                <span class="rf-empty-txt">Run refactor to see explanation</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/loader.js"></script>
+
+@section Scripts {
+    <script>
+        var editor, refEditor;
+        var _lastCode      = null;   // last code sent to the API
+        var _lastResult    = null;   // last API response (cached)
+        var _knownClean    = [];     // normalized codes confirmed as already clean
+        var refactorBtn = document.getElementById("refactorBtn");
+        var uploadBtn   = document.getElementById("uploadBtn");
+        var clearBtn    = document.getElementById("clearBtn");
+        var clearBtn2   = document.getElementById("clearBtn2");
+        var fileInput   = document.getElementById("fileInput");
+        var expList     = document.getElementById("expList");
+        var smellList   = document.getElementById("smellList");
+        var smellBadge  = document.getElementById("smellBadge");
+        var descCard    = document.getElementById("descCard");
+        var descText    = document.getElementById("descText");
+
+        // Category → icon mapping (matches exact category names from the AI prompt)
+        var CATEGORY_ICONS = {
+            "Naming":              "🏷",
+            "Magic Numbers":       "🔢",
+            "Long Function":       "📏",
+            "Dead Code":           "🪦",
+            "Missing Validation":  "🛡",
+            "Memory Leak":         "💧",
+            "Poor Formatting":     "📐",
+            "Missing Newline":     "↵",
+            "Redundant Code":      "♻",
+            "Global State":        "🌐",
+            "Poor Error Handling": "⚠",
+            "Integer Overflow":    "💣",
+            "Buffer Overflow":     "🚨",
+            "Unused Include":      "📦"
+        };
+
+        function escapeHtml(t) {
+            return String(t || "")
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;");
+        }
+
+        function looksLikeCOrCpp(code) {
+            var cpp   = ["#include","int main(","using namespace std","std::","cout <<","cin >>","printf(","scanf(","malloc(","free(","class ","struct ","->","nullptr","new ","delete "];
+            var other = ["System.out.println","public static void main","import java.","def ","console.log","using System","<?php","fn main()","package main","func main()"];
+            for (var i = 0; i < other.length; i++)
+                if (code.toLowerCase().indexOf(other[i].toLowerCase()) >= 0) return false;
+            for (var i = 0; i < cpp.length; i++)
+                if (code.toLowerCase().indexOf(cpp[i].toLowerCase()) >= 0) return true;
+            return false;
+        }
+
+        // Strip trailing spaces per line and normalize line endings so copy-paste
+        // whitespace differences don't break the "known clean" lookup.
+        function normalizeCode(code) {
+            return (code || "").replace(/\r\n/g, "\n").replace(/[ \t]+$/gm, "").trim();
+        }
+
+        function markClean(code) {
+            var n = normalizeCode(code);
+            if (n && _knownClean.indexOf(n) < 0) _knownClean.push(n);
+        }
+
+        function isKnownClean(code) {
+            return _knownClean.indexOf(normalizeCode(code)) >= 0;
+        }
+
+        function showValidationError(msg) {
+            var el = document.getElementById("rfValidMsg");
+            el.textContent = msg;
+            el.style.display = "block";
+        }
+
+        function clearValidationError() {
+            document.getElementById("rfValidMsg").style.display = "none";
+        }
+
+        // Returns null if valid, or an error string if not
+        function validateCode(code) {
+            var trimmed = code.trim();
+            if (!trimmed) return "⚠ Please enter some C/C++ code first.";
+
+            var nonEmptyLines = trimmed.split("\n").filter(function(l){ return l.trim().length > 0; });
+            if (nonEmptyLines.length < 2) return "⚠ Code is too short to analyze — paste a real C/C++ file.";
+
+            if (!looksLikeCOrCpp(code)) return "⚠ This doesn't look like C/C++ code. Only C/C++ is supported.";
+
+            // Basic brace balance check
+            var open = 0;
+            for (var i = 0; i < trimmed.length; i++) {
+                if (trimmed[i] === "{") open++;
+                else if (trimmed[i] === "}") open--;
+                if (open < 0) return "⚠ Unbalanced braces — check for a missing '{' in your code.";
+            }
+            if (open > 0) return "⚠ Unbalanced braces — check for a missing '}' in your code.";
+
+            return null;
+        }
+
+        function renderCodeDescription(text) {
+            if (!text) { descCard.style.display = "none"; return; }
+            descCard.style.display = "block";
+            descText.textContent = text;
+        }
+
+        function renderSmells(smells, alreadyClean) {
+            if (alreadyClean) {
+                smellBadge.style.display = "none";
+                smellList.innerHTML =
+                    '<div class="rf-clean-banner">' +
+                    '<div style="font-size:2rem;">✅</div>' +
+                    '<div class="rf-clean-title">Code is already clean</div>' +
+                    '<div class="rf-clean-sub">No refactoring needed — all quality checks passed.</div>' +
+                    '</div>';
+                return;
+            }
+            if (!smells || smells.length === 0) {
+                smellBadge.style.display = "none";
+                smellList.innerHTML =
+                    '<div class="rf-empty">' +
+                    '<div class="rf-empty-ico">✅</div>' +
+                    '<span class="rf-empty-txt">No code smells detected</span>' +
+                    '</div>';
+                return;
+            }
+
+            // Sort by line number ascending — top of file first
+            smells.sort(function (a, b) {
+                var lineA = (a.lineStart != null) ? a.lineStart : 9999;
+                var lineB = (b.lineStart != null) ? b.lineStart : 9999;
+                return lineA - lineB;
+            });
+
+            smellBadge.style.display = "inline";
+            smellBadge.textContent = smells.length + " issue" + (smells.length > 1 ? "s" : "") + " found";
+
+            var html = '<div class="smell-items">';
+
+            for (var i = 0; i < smells.length; i++) {
+                var s        = smells[i];
+                var sev      = (s.severity || "medium").toLowerCase();
+                var sevLabel = s.severity || "Medium";
+                var sevCls   = sev === "high" ? "sev-h" : sev === "low" ? "sev-l" : "sev-m";
+                var sevIcon  = sev === "high" ? "🔴" : sev === "low" ? "🟢" : "🟡";
+
+                var lineText = "";
+                if (s.lineStart && s.lineEnd && s.lineStart !== s.lineEnd) {
+                    lineText = "Lines " + s.lineStart + " – " + s.lineEnd;
+                } else if (s.lineStart) {
+                    lineText = "Line " + s.lineStart;
+                }
+
+                html +=
+                    '<div class="smell-row">' +
+
+                        '<div class="smell-num">' + (i + 1) + '</div>' +
+
+                        '<div class="smell-body">' +
+
+                            '<div class="smell-title-row">' +
+                                '<span class="smell-title">' + escapeHtml(s.title) + '</span>' +
+                                '<span class="sev-pill ' + sevCls + '">' + sevIcon + ' ' + escapeHtml(sevLabel) + '</span>' +
+                            '</div>' +
+
+                            '<div class="smell-meta-row">' +
+                                '<span class="smell-category">' + (CATEGORY_ICONS[s.category] || "📂") + ' ' + escapeHtml(s.category || "General") + '</span>' +
+                                (lineText ? '<span class="smell-line">📍 ' + escapeHtml(lineText) + '</span>' : '') +
+                            '</div>' +
+
+                            '<div class="smell-section-label">⚠ The problem</div>' +
+                            '<div class="smell-reason">' + escapeHtml(s.reason) + '</div>' +
+
+                            (s.impact
+                                ? '<div class="smell-section-label">💥 Impact</div>' +
+                                  '<div class="smell-impact">' + escapeHtml(s.impact) + '</div>'
+                                : '') +
+
+                            (s.fixSuggestion
+                                ? '<div class="smell-section-label">✅ How to fix</div>' +
+                                  '<div class="smell-fix">' + escapeHtml(s.fixSuggestion) + '</div>'
+                                : '') +
+
+                        '</div>' +
+                    '</div>';
+            }
+
+            html += '</div>';
+            smellList.innerHTML = html;
+        }
+
+        function renderExplanation(items) {
+            if (!items || items.length === 0) {
+                expList.innerHTML =
+                    '<div class="rf-empty">' +
+                    '<div class="rf-empty-ico">💡</div>' +
+                    '<span class="rf-empty-txt">No explanation available</span>' +
+                    '</div>';
+                return;
+            }
+
+            var html = '<div class="exp-items">';
+            for (var i = 0; i < items.length; i++) {
+                var parts = items[i].split('. ');
+                var title = parts[0];
+                var rest  = parts.slice(1).join('. ');
+                html +=
+                    '<div class="exp-row">' +
+                    '<div class="exp-tick">✓</div>' +
+                    '<div class="exp-txt">' +
+                    '<strong>' + escapeHtml(title) + '</strong>' +
+                    (rest ? '<br>' + escapeHtml(rest) : '') +
+                    '</div>' +
+                    '</div>';
+            }
+            html += '</div>';
+            html +=
+                '<div class="rf-tip">' +
+                '💡 <span>Always validate user input and follow consistent naming ' +
+                'conventions for cleaner, more maintainable code.</span>' +
+                '</div>';
+            expList.innerHTML = html;
+        }
+
+        require.config({ paths: { vs: "https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs" } });
+        window.MonacoEnvironment = {
+            getWorkerUrl: function () {
+                return 'data:text/javascript;charset=utf-8,' +
+                    'self.MonacoEnvironment={baseUrl:"https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/"};' +
+                    'importScripts("https://cdn.jsdelivr.net/npm/monaco-editor@0.45.0/min/vs/base/worker/workerMain.js");';
+            }
+        };
+
+        require(["vs/editor/editor.main"], function () {
+            var common = {
+                language: "cpp",
+                theme: "vs",
+                automaticLayout: true,
+                minimap: { enabled: false },
+                fontSize: 13,
+                fontFamily: "'DM Mono', monospace",
+                fontLigatures: true,
+                scrollBeyondLastLine: false,
+                lineNumbers: "on",
+                padding: { top: 14, bottom: 14 },
+                smoothScrolling: true,
+                renderLineHighlight: "gutter"
+            };
+            editor = monaco.editor.create(
+                document.getElementById("editor"),
+                Object.assign({}, common, { value: "" })
+            );
+            refEditor = monaco.editor.create(
+                document.getElementById("refEditor"),
+                Object.assign({}, common, { value: "", readOnly: true })
+            );
+
+            // When user edits input, restore the refactor button if it was locked
+            editor.onDidChangeModelContent(function () {
+                clearValidationError();
+                if (refactorBtn.disabled || refactorBtn.style.background) {
+                    var current = editor.getValue().trim();
+                    if (current !== _lastCode) {
+                        refactorBtn.disabled = false;
+                        refactorBtn.innerHTML = "✨ Refactor Code";
+                        refactorBtn.style.background = "";
+                    }
+                }
+            });
+        });
+
+        uploadBtn.addEventListener("click", function () { fileInput.click(); });
+
+        fileInput.addEventListener("change", function () {
+            var file = fileInput.files[0];
+            if (!file) return;
+            var exts = [".c", ".cpp", ".cc", ".cxx", ".h", ".hpp", ".hh"];
+            var valid = false;
+            for (var i = 0; i < exts.length; i++)
+                if (file.name.toLowerCase().endsWith(exts[i])) { valid = true; break; }
+            if (!valid) {
+                alert("Only C/C++ files are supported.");
+                fileInput.value = "";
+                return;
+            }
+            var reader = new FileReader();
+            reader.onload = function (e) { editor.setValue(e.target.result); };
+            reader.readAsText(file);
+            fileInput.value = "";
+        });
+
+        function clearAll() {
+            if (editor)    editor.setValue("");
+            if (refEditor) refEditor.setValue("");
+            _lastCode   = null;
+            _lastResult = null;
+            _knownClean = [];
+            renderCodeDescription("");
+            renderExplanation([]);
+            renderSmells([], false);
+            smellBadge.style.display = "none";
+            refactorBtn.disabled = false;
+            refactorBtn.innerHTML = "✨ Refactor Code";
+            refactorBtn.style.background = "";
+        }
+
+        clearBtn.addEventListener("click",  clearAll);
+        clearBtn2.addEventListener("click", clearAll);
+
+        document.getElementById("copyRefBtn").addEventListener("click", function () {
+            if (!refEditor) return;
+            var code = refEditor.getValue();
+            if (!code.trim()) { return; }
+            navigator.clipboard.writeText(code).then(function () {
+                var btn = document.getElementById("copyRefBtn");
+                btn.innerHTML = "✓ Copied!";
+                btn.style.color = "var(--green)";
+                btn.style.borderColor = "var(--green)";
+                setTimeout(function () {
+                    btn.innerHTML = "⎘ Copy";
+                    btn.style.color = "";
+                    btn.style.borderColor = "";
+                }, 2000);
+            });
+        });
+
+        function showResult(data) {
+            var isClean = !!data.alreadyClean;
+            refEditor.setValue(isClean ? "" : (data.refactoredCode || ""));
+            renderCodeDescription(data.codeDescription || "");
+            renderSmells(data.smells || [], isClean);
+            renderExplanation(data.explanation || []);
+
+            if (isClean) {
+                refactorBtn.disabled = true;
+                refactorBtn.innerHTML = "✅ Code is already clean";
+                refactorBtn.style.background = "var(--green)";
+            } else {
+                // Re-enable button after successful refactoring
+                refactorBtn.disabled = false;
+                refactorBtn.innerHTML = "✨ Refactor Code";
+                refactorBtn.style.background = "";
+            }
+        }
+
+        refactorBtn.addEventListener("click", async function () {
+            if (!editor) { showValidationError("Editor is still loading."); return; }
+            var code = editor.getValue();
+
+            clearValidationError();
+
+            var validErr = validateCode(code);
+            if (validErr) { showValidationError(validErr); return; }
+
+            // Already confirmed clean in this session — skip API
+            if (isKnownClean(code)) {
+                var desc = (_lastResult && _lastResult.codeDescription) ? _lastResult.codeDescription : "";
+                showResult({
+                    alreadyClean:    true,
+                    codeDescription: desc,
+                    refactoredCode:  "",
+                    smells:          [],
+                    explanation:     ["This code was previously verified as clean — all quality checks pass. No further changes are needed."]
+                });
+                return;
+            }
+
+            // Exact same raw code as last API call — show cached result
+            if (_lastCode !== null && normalizeCode(code) === normalizeCode(_lastCode)) {
+                showResult(_lastResult);
+                return;
+            }
+
+            refactorBtn.disabled = true;
+            refactorBtn.innerHTML = '<span class="spinner"></span> Refactoring…';
+            refactorBtn.style.background = "";
+
+            try {
+                var res = await fetch("/api/refactor", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ code: code, language: "cpp" })
+                });
+                var data = await res.json();
+                if (!res.ok) throw new Error(data.message || "Request failed.");
+
+                _lastCode   = code.trim();
+                _lastResult = data;
+
+                // Remember the refactored output as clean so future submissions skip the API
+                if (data.refactoredCode) markClean(data.refactoredCode);
+                // If AI itself said it's clean, remember the input too
+                if (data.alreadyClean)   markClean(code);
+
+                showResult(data);
+            } catch (err) {
+                showValidationError("✕ " + (err.message || "Something went wrong. Please try again."));
+                refactorBtn.disabled = false;
+                refactorBtn.innerHTML = "✨ Refactor Code";
+            }
+        });
+    </script>
+}

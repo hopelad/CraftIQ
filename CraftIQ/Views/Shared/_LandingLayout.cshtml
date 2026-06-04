@@ -1,0 +1,165 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - CraftIQ</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: #faf7f2;
+        }
+
+        .ln-nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(250,247,242,.95);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+            padding: 1.1rem 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .ln-logo {
+            display: flex;
+            align-items: center;
+            gap: .65rem;
+            text-decoration: none;
+        }
+
+        .ln-logo-mark {
+            width: 34px;
+            height: 34px;
+            border-radius: 9px;
+            background: var(--dark);
+            color: var(--cream);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--mono);
+            font-size: .72rem;
+            font-weight: 500;
+            letter-spacing: -.02em;
+        }
+
+        .ln-logo-text {
+            font-family: var(--serif);
+            font-weight: 700;
+            font-size: 1.15rem;
+            color: var(--dark);
+            letter-spacing: -.01em;
+        }
+
+            .ln-logo-text em {
+                font-style: italic;
+                color: var(--accent);
+            }
+
+        .ln-links {
+            display: flex;
+            gap: 2.5rem;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+            .ln-links a {
+                text-decoration: none;
+                color: var(--muted);
+                font-size: .875rem;
+                font-weight: 400;
+                transition: color .2s;
+                letter-spacing: .01em;
+            }
+
+                .ln-links a:hover {
+                    color: var(--dark);
+                }
+
+        .ln-actions {
+            display: flex;
+            gap: .75rem;
+            align-items: center;
+        }
+
+        .ln-btn-ghost {
+            padding: .5rem 1.25rem;
+            border: 1px solid var(--border-dark);
+            border-radius: 8px;
+            background: transparent;
+            color: var(--charcoal);
+            font-size: .85rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all .2s;
+            font-family: var(--sans);
+        }
+
+            .ln-btn-ghost:hover {
+                background: var(--paper);
+                border-color: var(--tan);
+                color: var(--dark);
+            }
+
+        .ln-btn-solid {
+            padding: .5rem 1.25rem;
+            background: var(--dark);
+            border: 1px solid var(--dark);
+            border-radius: 8px;
+            color: var(--cream);
+            font-size: .85rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all .2s;
+            font-family: var(--sans);
+        }
+
+            .ln-btn-solid:hover {
+                background: var(--charcoal);
+                color: var(--cream);
+            }
+
+        @@media (max-width: 768px) {
+            .ln-nav {
+                padding: 1rem 1.25rem;
+            }
+
+            .ln-links {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="ln-nav">
+        <a class="ln-logo" href="/">
+            <div class="ln-logo-mark">&lt;/&gt;</div>
+            <span class="ln-logo-text">Craft<em>IQ</em></span>
+        </a>
+        <ul class="ln-links">
+            <li><a href="#features">Features</a></li>
+            <li><a href="#how-it-works">How it works</a></li>
+            <li><a href="#stats">About</a></li>
+        </ul>
+        <div class="ln-actions">
+            <a href="/Home/Login" class="ln-btn-ghost">Sign in</a>
+            <a href="/Home/Login" class="ln-btn-solid">Get started →</a>
+        </div>
+    </nav>
+
+    <main>@RenderBody()</main>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

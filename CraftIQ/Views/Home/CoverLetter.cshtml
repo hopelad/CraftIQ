@@ -1,0 +1,687 @@
+﻿@{
+    ViewData["Title"] = "Cover Letter Writer";
+    ViewData["Page"] = "coverletter";
+}
+
+<style>
+    .cl-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 1.75rem;
+        padding-bottom: 1.4rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .cl-top-left {
+        display: flex;
+        align-items: center;
+        gap: .9rem;
+    }
+
+    .cl-top-icon {
+        width: 46px;
+        height: 46px;
+        border-radius: 12px;
+        background: #fef3c7;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.15rem;
+    }
+
+    .cl-top-title {
+        font-family: var(--serif);
+        font-weight: 700;
+        font-size: 1.2rem;
+        color: var(--dark);
+        letter-spacing: -.01em;
+        margin-bottom: .15rem;
+    }
+
+    .cl-top-sub {
+        font-size: .8rem;
+        color: var(--muted);
+    }
+
+    .btn-sm-ghost {
+        display: flex;
+        align-items: center;
+        gap: .35rem;
+        padding: .45rem .95rem;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: var(--warm-white);
+        color: var(--muted);
+        font-size: .8rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all .2s;
+        font-family: var(--sans);
+    }
+
+        .btn-sm-ghost:hover {
+            border-color: var(--tan);
+            color: var(--dark);
+        }
+
+    .tmpl-wrap {
+        background: var(--warm-white);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        overflow: hidden;
+        margin-bottom: 1.5rem;
+    }
+
+    .tmpl-head {
+        padding: .8rem 1.1rem;
+        border-bottom: 1px solid var(--border);
+        background: var(--paper);
+        font-family: var(--mono);
+        font-size: .75rem;
+        font-weight: 500;
+        color: var(--charcoal);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        cursor: pointer;
+    }
+
+    .tmpl-body {
+        padding: 1.25rem;
+    }
+
+    .tmpl-section-label {
+        font-size: .68rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .1em;
+        color: var(--tan);
+        font-family: var(--mono);
+        margin-bottom: .75rem;
+    }
+
+    .tmpl-grid {
+        display: grid;
+        grid-template-columns: repeat(5,1fr);
+        gap: .75rem;
+    }
+
+    .tmpl-card {
+        border: 1.5px solid var(--border);
+        border-radius: 10px;
+        overflow: hidden;
+        cursor: pointer;
+        transition: all .2s;
+        background: var(--cream);
+    }
+
+        .tmpl-card:hover {
+            border-color: var(--tan);
+            transform: translateY(-1px);
+        }
+
+        .tmpl-card.active {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(193,127,62,.2);
+        }
+
+    .tmpl-preview {
+        padding: .6rem .6rem .4rem;
+        background: #fff;
+        min-height: 68px;
+    }
+
+    .tmpl-preview-name {
+        font-size: .6rem;
+        font-weight: 700;
+        margin-bottom: .35rem;
+        font-family: var(--mono);
+    }
+
+    .tmpl-preview-lines {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+    }
+
+    .tmpl-line {
+        height: 4px;
+        border-radius: 2px;
+        background: #e0e0e0;
+    }
+
+    .tmpl-name {
+        padding: .3rem .5rem .15rem;
+        font-size: .72rem;
+        font-weight: 600;
+        color: var(--dark);
+    }
+
+    .tmpl-desc {
+        padding: 0 .5rem .4rem;
+        font-size: .62rem;
+        color: var(--muted);
+        font-family: var(--mono);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .cl-color-row {
+        display: flex;
+        align-items: center;
+        gap: .75rem;
+        flex-wrap: wrap;
+        margin-top: 1rem;
+        padding-top: .85rem;
+        border-top: 1px solid var(--border);
+    }
+
+    .cl-color-label {
+        font-size: .67rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .1em;
+        color: var(--tan);
+        font-family: var(--mono);
+    }
+
+    #clColorPicker {
+        width: 32px;
+        height: 32px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 2px;
+        background: var(--cream);
+        cursor: pointer;
+    }
+
+    #clColorHex {
+        width: 84px !important;
+        padding: .35rem .65rem !important;
+        font-family: var(--mono) !important;
+        font-size: .78rem !important;
+        margin-bottom: 0 !important;
+    }
+
+    .cl-layout {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+    }
+
+    .cl-form-card {
+        background: var(--warm-white);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        overflow: hidden;
+    }
+
+    .cl-card-head {
+        padding: .8rem 1.1rem;
+        border-bottom: 1px solid var(--border);
+        background: var(--paper);
+        font-family: var(--mono);
+        font-size: .75rem;
+        font-weight: 500;
+        color: var(--charcoal);
+    }
+
+    .cl-form-body {
+        padding: 1.25rem;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: .3rem;
+        margin-bottom: .85rem;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: .85rem;
+        margin-bottom: .85rem;
+    }
+
+    label {
+        font-size: .73rem;
+        font-weight: 500;
+        color: var(--charcoal);
+        letter-spacing: .02em;
+        font-family: var(--sans);
+    }
+
+    input[type="text"], textarea {
+        width: 100%;
+        padding: .6rem .85rem;
+        background: var(--cream);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        font-size: .84rem;
+        color: var(--dark);
+        font-family: var(--sans);
+        outline: none;
+        transition: border-color .2s, box-shadow .2s;
+    }
+
+        input:focus, textarea:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(193,127,62,.08);
+            background: #fff;
+        }
+
+        input::placeholder, textarea::placeholder {
+            color: var(--tan);
+        }
+
+    textarea {
+        resize: vertical;
+        line-height: 1.5;
+    }
+
+    .form-section-label {
+        font-size: .68rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .1em;
+        color: var(--tan);
+        font-family: var(--mono);
+        margin: 1rem 0 .6rem;
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+    }
+
+        .form-section-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+    .tone-row {
+        display: flex;
+        gap: .5rem;
+        flex-wrap: wrap;
+        margin-bottom: .85rem;
+    }
+
+    .tone-pill {
+        padding: .3rem .85rem;
+        border-radius: 100px;
+        border: 1px solid var(--border);
+        background: var(--cream);
+        font-size: .78rem;
+        font-weight: 500;
+        color: var(--muted);
+        cursor: pointer;
+        transition: all .2s;
+        font-family: var(--sans);
+    }
+
+        .tone-pill.active {
+            background: var(--dark);
+            color: var(--cream);
+            border-color: var(--dark);
+        }
+
+        .tone-pill:hover:not(.active) {
+            border-color: var(--tan);
+            color: var(--dark);
+        }
+
+    .cl-generate-btn {
+        width: 100%;
+        padding: .8rem;
+        background: var(--brown);
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        font-family: var(--serif);
+        font-weight: 600;
+        font-size: .95rem;
+        cursor: pointer;
+        box-shadow: 0 3px 14px rgba(139,111,71,.2);
+        transition: all .2s;
+        margin-top: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: .5rem;
+    }
+
+        .cl-generate-btn:hover {
+            background: #7a5e3a;
+            transform: translateY(-1px);
+        }
+
+        .cl-generate-btn:disabled {
+            opacity: .6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+    .cl-preview-card {
+        background: var(--warm-white);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        overflow: hidden;
+        position: sticky;
+        top: 1rem;
+    }
+
+    .cl-preview-head {
+        padding: .8rem 1.1rem;
+        border-bottom: 1px solid var(--border);
+        background: var(--paper);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .cl-preview-label {
+        font-family: var(--mono);
+        font-size: .75rem;
+        font-weight: 500;
+        color: var(--charcoal);
+    }
+
+    .cl-preview-body {
+        padding: 1.5rem;
+        min-height: 500px;
+        overflow-y: auto;
+        max-height: 620px;
+    }
+
+    .download-bar {
+        display: none;
+        gap: .6rem;
+        align-items: center;
+        padding: .75rem 1.1rem;
+        border-top: 1px solid var(--border);
+        background: var(--paper);
+    }
+
+    .download-bar-label {
+        font-family: var(--mono);
+        font-size: .72rem;
+        color: var(--muted);
+    }
+
+    .btn-download {
+        display: flex;
+        align-items: center;
+        gap: .35rem;
+        padding: .45rem 1rem;
+        border-radius: 8px;
+        font-size: .8rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all .2s;
+        font-family: var(--sans);
+        border: none;
+    }
+
+    .btn-dl-pdf {
+        background: var(--dark);
+        color: var(--cream);
+    }
+
+        .btn-dl-pdf:hover {
+            background: var(--charcoal);
+        }
+
+    .btn-dl-docx {
+        background: #1565c0;
+        color: #fff;
+    }
+
+        .btn-dl-docx:hover {
+            background: #0d47a1;
+        }
+
+    .btn-download:disabled {
+        opacity: .6;
+        cursor: not-allowed;
+    }
+
+    .cl-doc {
+        font-family: var(--sans);
+        font-size: .85rem;
+        line-height: 1.75;
+    }
+
+    .cl-doc-subject {
+        font-weight: 600;
+        color: var(--accent);
+        font-size: .8rem;
+        margin-bottom: 1.1rem;
+        font-family: var(--mono);
+        padding: .4rem .75rem;
+        background: var(--accent-light);
+        border-radius: 6px;
+        display: inline-block;
+    }
+
+    .cl-doc-section-label {
+        font-size: .67rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .1em;
+        color: var(--tan);
+        font-family: var(--mono);
+        margin-bottom: .35rem;
+    }
+
+    .cl-doc-para {
+        margin-bottom: 1rem;
+        color: var(--charcoal);
+    }
+
+    .cl-doc-divider {
+        height: 1px;
+        background: var(--border);
+        margin: .9rem 0;
+    }
+
+    .cl-tips {
+        margin-top: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: .4rem;
+    }
+
+    .cl-tip {
+        display: flex;
+        gap: .5rem;
+        align-items: flex-start;
+        background: #fefce8;
+        border: 1px solid #fde68a;
+        border-radius: 8px;
+        padding: .5rem .7rem;
+        font-size: .78rem;
+        color: #92400e;
+        line-height: 1.5;
+    }
+
+    .cl-empty {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 420px;
+        gap: .75rem;
+        text-align: center;
+    }
+
+    .cl-empty-ico {
+        width: 56px;
+        height: 56px;
+        border-radius: 16px;
+        background: var(--paper);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+    }
+
+    .cl-empty-title {
+        font-family: var(--serif);
+        font-weight: 600;
+        font-size: 1rem;
+        color: var(--dark);
+    }
+
+    .cl-empty-sub {
+        font-size: .8rem;
+        color: var(--tan);
+        font-family: var(--mono);
+    }
+
+    @@media (max-width: 1100px) {
+        .tmpl-grid {
+            grid-template-columns: repeat(3,1fr);
+        }
+    }
+
+    @@media (max-width: 960px) {
+        .cl-layout {
+            grid-template-columns: 1fr;
+        }
+
+        .cl-preview-card {
+            position: static;
+        }
+
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+
+        .tmpl-grid {
+            grid-template-columns: repeat(3,1fr);
+        }
+    }
+
+    @@media (max-width: 600px) {
+        .tmpl-grid {
+            grid-template-columns: repeat(2,1fr);
+        }
+    }
+</style>
+
+<div class="cl-top">
+    <div class="cl-top-left">
+        <div class="cl-top-icon">&#9993;</div>
+        <div>
+            <div class="cl-top-title">Cover Letter Writer</div>
+            <div class="cl-top-sub">Choose a template — AI writes a natural, personalized cover letter.</div>
+        </div>
+    </div>
+    <button id="clearBtnCL" class="btn-sm-ghost" type="button">&#10005; Clear</button>
+</div>
+
+<!-- Template Selector -->
+<div class="tmpl-wrap">
+    <div class="tmpl-head" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'block' : 'none';">
+        <span>&#127912; Template &mdash; <span style="color:var(--accent);" id="selectedCLTmplName">Prestige</span></span>
+        <span style="color:var(--muted);">&#9660; expand</span>
+    </div>
+    <div class="tmpl-body" style="display:none;">
+        <div id="clTemplateSelector"></div>
+        <div class="cl-color-row">
+            <span class="cl-color-label">Accent Color</span>
+            <input type="color" id="clColorPicker" title="Pick accent color" />
+            <input type="text" id="clColorHex" maxlength="7" placeholder="#1a1a2e" />
+        </div>
+    </div>
+</div>
+
+<div class="cl-layout">
+
+    <div class="cl-form-card">
+        <div class="cl-card-head">&#128221; Application Details</div>
+        <div class="cl-form-body">
+
+            <div class="form-section-label">Your Details</div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Full Name *</label>
+                    <input type="text" id="fullNameCL" placeholder="e.g. Ali Hassan" />
+                </div>
+                <div class="form-group">
+                    <label>Your Current Role</label>
+                    <input type="text" id="jobTitleCL" placeholder="e.g. Software Engineer" />
+                </div>
+            </div>
+
+            <div class="form-section-label">The Role</div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Company Name *</label>
+                    <input type="text" id="companyName" placeholder="e.g. Google" />
+                </div>
+                <div class="form-group">
+                    <label>Hiring Manager</label>
+                    <input type="text" id="hiringManager" placeholder="e.g. Sarah Johnson (optional)" />
+                </div>
+            </div>
+
+            <div class="form-section-label">Your Background</div>
+            <div class="form-group">
+                <label>Relevant Experience *</label>
+                <textarea id="experienceCL" rows="4"
+                          placeholder="Your most relevant experience. e.g. 4 years of C++ development, built real-time systems..."></textarea>
+            </div>
+            <div class="form-group">
+                <label>Key Skills</label>
+                <textarea id="skillsCL" rows="2"
+                          placeholder="e.g. C++, Python, system design, agile"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Why This Company? *</label>
+                <textarea id="whyCompany" rows="3"
+                          placeholder="What excites you about this company? Be specific."></textarea>
+            </div>
+
+            <div class="form-section-label">Tone</div>
+            <div class="tone-row" id="toneRow">
+                <div class="tone-pill active" data-tone="Professional">Professional</div>
+                <div class="tone-pill" data-tone="Enthusiastic">Enthusiastic</div>
+                <div class="tone-pill" data-tone="Conversational">Conversational</div>
+                <div class="tone-pill" data-tone="Confident">Confident</div>
+            </div>
+
+            <button id="generateBtnCL" class="cl-generate-btn" type="button">
+                &#10024; Write My Cover Letter
+            </button>
+        </div>
+    </div>
+
+    <div class="cl-preview-card">
+        <div class="cl-preview-head">
+            <div class="cl-preview-label">&#128065; Cover Letter Preview</div>
+        </div>
+        <div class="cl-preview-body" id="clPreview">
+            <div class="cl-empty">
+                <div class="cl-empty-ico">&#9993;</div>
+                <div class="cl-empty-title">Your cover letter will appear here</div>
+                <div class="cl-empty-sub">Choose a template and click Generate</div>
+            </div>
+        </div>
+        <div class="download-bar" id="clDownloadBar">
+            <span class="download-bar-label">Download as:</span>
+            <button id="clDlPdf" class="btn-download btn-dl-pdf" type="button">&#128196; PDF</button>
+            <button id="clDlDocx" class="btn-download btn-dl-docx" type="button">&#128196; DOCX</button>
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+    <script src="~/js/coverletter.js"></script>
+}

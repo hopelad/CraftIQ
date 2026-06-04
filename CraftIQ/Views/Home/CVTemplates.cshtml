@@ -1,0 +1,1633 @@
+@{
+    ViewData["Title"] = "Choose Template";
+    ViewData["Page"] = "cvbuilder";
+    var cvRecordId = ViewData["CVRecordId"]?.ToString() ?? "";
+}
+
+<style>
+    /* ── Page shell ── */
+    .tmpl-shell {
+        display: grid;
+        grid-template-columns: 252px 1fr;
+        grid-template-rows: auto 1fr;
+        gap: 0;
+        height: calc(100vh - 56px);
+        margin: -2rem -2rem 0;
+        overflow: hidden;
+    }
+
+    /* ── Top bar ── */
+    .tmpl-topbar {
+        grid-column: 1 / -1;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: .6rem 1.1rem;
+        gap: 1rem;
+        background: var(--warm-white);
+        border-bottom: 1px solid var(--border);
+        flex-wrap: wrap;
+    }
+
+    .tmpl-topbar-left { display:flex; align-items:center; gap:.7rem; }
+    .tmpl-topbar-title { font-family:var(--serif); font-weight:700; font-size:.95rem; color:var(--dark); }
+    .tmpl-topbar-sub { font-size:.7rem; color:var(--muted); }
+
+    .active-tmpl-badge {
+        background:var(--accent-light); color:var(--accent);
+        font-size:.7rem; font-weight:700; font-family:var(--mono);
+        padding:.18rem .55rem; border-radius:100px; border:1px solid var(--accent);
+    }
+
+    /* ── Left panel ── */
+    .tmpl-left {
+        border-right:1px solid var(--border); background:var(--paper);
+        overflow-y:auto; display:flex; flex-direction:column;
+    }
+
+    .tmpl-list-head {
+        padding:.65rem 1rem; border-bottom:1px solid var(--border);
+        font-family:var(--mono); font-size:.67rem; font-weight:700;
+        text-transform:uppercase; letter-spacing:.1em; color:var(--tan);
+        position:sticky; top:0; background:var(--paper); z-index:1;
+    }
+
+    .tmpl-grid {
+        display:grid; grid-template-columns:1fr 1fr; gap:.45rem; padding:.65rem;
+    }
+
+    .tmpl-item {
+        border:2px solid var(--border); border-radius:9px; overflow:hidden;
+        cursor:pointer; transition:all .14s; background:#fff;
+    }
+    .tmpl-item:hover { border-color:var(--tan); transform:translateY(-1px); box-shadow:0 3px 10px rgba(44,36,22,.1); }
+    .tmpl-item.active { border-color:var(--accent); box-shadow:0 0 0 3px rgba(193,127,62,.15); }
+
+    .tmpl-item-thumb { height:60px; overflow:hidden; }
+    .tmpl-item-label {
+        padding:.22rem .4rem .3rem; display:flex; align-items:center;
+        justify-content:space-between; font-size:.66rem; font-weight:600;
+        color:var(--dark); font-family:var(--sans);
+    }
+
+    /* ── Colour section ── */
+    .color-section { padding:.65rem 1rem; border-top:1px solid var(--border); }
+    .color-section-head {
+        font-family:var(--mono); font-size:.67rem; font-weight:700;
+        text-transform:uppercase; letter-spacing:.1em; color:var(--tan); margin-bottom:.55rem;
+    }
+    .color-dots { display:flex; flex-wrap:wrap; gap:.35rem; margin-bottom:.6rem; }
+    .color-dot {
+        width:21px; height:21px; border-radius:50%; cursor:pointer;
+        border:2px solid transparent; transition:transform .14s, border-color .14s; flex-shrink:0;
+    }
+    .color-dot:hover { transform:scale(1.2); }
+    .color-dot.active { border-color:var(--dark); transform:scale(1.15); box-shadow:0 0 0 2px rgba(255,255,255,.8); }
+    .color-row { display:flex; align-items:center; gap:.45rem; font-size:.7rem; color:var(--muted); font-family:var(--mono); }
+    .color-row input[type=color] { width:28px; height:24px; border:1px solid var(--border); border-radius:5px; cursor:pointer; padding:2px; background:var(--cream); }
+    .color-row input[type=text] { width:76px; padding:.26rem .48rem; background:var(--cream); border:1px solid var(--border); border-radius:5px; font-size:.7rem; font-family:var(--mono); color:var(--dark); outline:none; }
+    .color-row input[type=text]:focus { border-color:var(--accent); }
+
+    /* ── Quick edit section ── */
+    .qe-section { padding:.65rem 1rem; border-top:1px solid var(--border); flex:1; }
+    .qe-section-head {
+        font-family:var(--mono); font-size:.67rem; font-weight:700;
+        text-transform:uppercase; letter-spacing:.1em; color:var(--tan);
+        margin-bottom:.55rem; display:flex; align-items:center;
+        justify-content:space-between; cursor:pointer; user-select:none;
+    }
+    .qe-section-head:hover { color:var(--accent); }
+    .qe-field { margin-bottom:.5rem; }
+    .qe-field label { display:block; font-size:.63rem; font-weight:600; color:var(--muted); font-family:var(--mono); text-transform:uppercase; letter-spacing:.06em; margin-bottom:.18rem; }
+    .qe-field input, .qe-field textarea { width:100%; padding:.38rem .55rem; background:var(--cream); border:1px solid var(--border); border-radius:6px; font-size:.78rem; color:var(--dark); font-family:var(--sans); outline:none; transition:border-color .2s; }
+    .qe-field input:focus, .qe-field textarea:focus { border-color:var(--accent); background:#fff; }
+    .qe-field textarea { resize:vertical; min-height:60px; line-height:1.5; }
+
+    /* ── Right panel ── */
+    .tmpl-right { display:flex; flex-direction:column; overflow:hidden; background:var(--warm-white); }
+
+    /* ══════════════════════════════════════════════════════
+       WORD-LIKE FORMATTING TOOLBAR
+    ══════════════════════════════════════════════════════ */
+    .fmt-toolbar {
+        display:flex; align-items:center; gap:0;
+        padding:0 .6rem;
+        border-bottom:1px solid var(--border);
+        background:#f8f7f5;
+        flex-shrink:0;
+        min-height:38px;
+        flex-wrap:wrap;
+        overflow-x:auto;
+    }
+
+    .fmt-group {
+        display:flex; align-items:center; gap:1px;
+        padding:4px 2px;
+        flex-shrink:0;
+    }
+
+    .fmt-sep {
+        width:1px; height:22px; background:#d8d3cc;
+        margin:0 4px; flex-shrink:0; align-self:center;
+    }
+
+    /* Buttons */
+    .fmt-btn {
+        display:inline-flex; align-items:center; justify-content:center;
+        width:26px; height:26px; min-width:26px;
+        border:1px solid transparent; border-radius:4px;
+        background:none; cursor:pointer;
+        font-size:.78rem; color:#3d3830;
+        transition:background .12s, border-color .12s;
+        font-family:var(--sans); flex-shrink:0;
+        user-select:none; -webkit-user-select:none;
+    }
+    .fmt-btn:hover { background:#ede9e2; border-color:#ccc7be; }
+    .fmt-btn.active { background:#dde3f4; border-color:#7b96d1; color:#1a3c8a; }
+    .fmt-btn:active { background:#d4d0c8; }
+
+    /* Wide buttons (text label) */
+    .fmt-btn-wide {
+        width:auto; padding:0 7px; font-size:.7rem; letter-spacing:.03em;
+    }
+
+    /* Font family select */
+    .fmt-sel-font {
+        height:26px; width:128px; padding:0 .35rem;
+        border:1px solid #cdc8bf; border-radius:4px;
+        background:#fff; font-size:.76rem; color:#3d3830;
+        font-family:var(--sans); outline:none; cursor:pointer;
+    }
+    .fmt-sel-font:focus { border-color:#8b7355; }
+
+    /* Font size input */
+    .fmt-size-wrap {
+        display:flex; align-items:center; gap:1px;
+    }
+    .fmt-size-input {
+        width:36px; height:26px; padding:0 4px; text-align:center;
+        border:1px solid #cdc8bf; border-radius:4px 0 0 4px;
+        background:#fff; font-size:.76rem; color:#3d3830;
+        font-family:var(--sans); outline:none;
+    }
+    .fmt-size-input:focus { border-color:#8b7355; }
+    .fmt-size-arrows {
+        display:flex; flex-direction:column; border:1px solid #cdc8bf;
+        border-left:none; border-radius:0 4px 4px 0; overflow:hidden;
+    }
+    .fmt-sz-btn {
+        width:18px; height:13px; background:#f0ede8; border:none;
+        cursor:pointer; display:flex; align-items:center; justify-content:center;
+        font-size:6px; color:#666; padding:0; line-height:1;
+    }
+    .fmt-sz-btn:hover { background:#e0dbd2; }
+    .fmt-sz-btn:first-child { border-bottom:1px solid #cdc8bf; }
+
+    /* Underline button decoration */
+    #fmtUnderline { text-decoration:underline; }
+
+    /* Strikethrough button */
+    #fmtStrike { text-decoration:line-through; }
+
+    /* Color picker widgets — like Word's "A" with color bar underneath */
+    .fmt-color-wrap {
+        display:inline-flex; flex-direction:column; align-items:center;
+        cursor:pointer; padding:2px 4px; border:1px solid transparent;
+        border-radius:4px; gap:1px; height:26px; justify-content:center;
+        position:relative;
+    }
+    .fmt-color-wrap:hover { background:#ede9e2; border-color:#ccc7be; }
+
+    .fmt-color-letter {
+        font-size:.8rem; font-weight:700; color:#3d3830;
+        line-height:1; display:block; pointer-events:none;
+    }
+    .fmt-color-bar {
+        height:3px; width:18px; border-radius:1px; pointer-events:none;
+    }
+    .fmt-hidden-color {
+        position:absolute; width:100%; height:100%; opacity:0;
+        cursor:pointer; left:0; top:0; border:none; padding:0;
+    }
+
+    /* Line spacing select */
+    .fmt-sel-small {
+        height:26px; padding:0 .3rem;
+        border:1px solid #cdc8bf; border-radius:4px;
+        background:#fff; font-size:.72rem; color:#3d3830;
+        font-family:var(--mono); outline:none; cursor:pointer;
+    }
+    .fmt-sel-small:focus { border-color:#8b7355; }
+
+    /* ── Preview area ── */
+    .preview-area-wrap {
+        flex: 1; overflow-y: auto;
+        padding: 2rem 2.5rem;
+        background: #c8c4bc;  /* neutral gray background — makes white paper pop */
+    }
+
+    /* A4 paper: 210mm × 297mm at 96 dpi ≈ 794px × 1123px */
+    .preview-paper {
+        background: #fff;
+        box-shadow:
+            0 1px 3px rgba(0,0,0,.12),
+            0 4px 16px rgba(0,0,0,.10),
+            0 12px 40px rgba(0,0,0,.08);
+        width: 210mm;         /* exact A4 width */
+        min-height: 297mm;    /* exact A4 height */
+        margin: 0 auto;
+        border-radius: 1px;
+        outline: none;
+        cursor: text;
+        /* Fonts scaled to professional sizes via scaleTemplateFonts() in renderPreview() */
+    }
+
+    /* ── Action bar ── */
+    .tmpl-action-bar {
+        display:flex; align-items:center; gap:.55rem; flex-wrap:wrap;
+        padding:.6rem 1rem; border-top:1px solid var(--border);
+        background:var(--paper); flex-shrink:0;
+    }
+
+    .btn-a {
+        display:inline-flex; align-items:center; gap:.32rem;
+        padding:.44rem .9rem; border-radius:7px; font-size:.78rem;
+        font-weight:600; cursor:pointer; font-family:var(--sans);
+        border:none; transition:all .18s; text-decoration:none; flex-shrink:0;
+    }
+    .btn-a:disabled { opacity:.6; cursor:not-allowed; }
+    .btn-save  { background:var(--green); color:#fff; }
+    .btn-save:hover  { background:#3d6b4a; }
+    .btn-pdf   { background:var(--dark); color:var(--cream); }
+    .btn-pdf:hover   { background:var(--charcoal); }
+    .btn-docx  { background:#1565c0; color:#fff; }
+    .btn-docx:hover  { background:#0d47a1; }
+    .btn-back  { background:none; color:var(--muted); border:1px solid var(--border); }
+    .btn-back:hover  { border-color:var(--tan); color:var(--dark); }
+    .btn-edit  { background:var(--accent-light); color:var(--accent); border:1px solid var(--accent); margin-left:auto; }
+    .btn-edit:hover  { background:var(--accent); color:#fff; }
+    .btn-png   { background:#0891b2; color:#fff; }
+    .btn-png:hover   { background:#0e7490; }
+
+    /* Saving indicator */
+    .save-status {
+        font-size:.72rem; color:var(--muted); font-family:var(--mono);
+        display:none; align-items:center; gap:.3rem;
+    }
+    .save-status.visible { display:flex; }
+
+    /* ── Print / Export CSS ── */
+    @@media print {
+        body > *:not(#printRoot) { display:none !important; }
+        #printRoot { display:block !important; }
+        .tmpl-shell { display:none !important; }
+        .print-frame {
+            display:block !important;
+            width:100%; margin:0; padding:0;
+            box-shadow:none; border:none; border-radius:0;
+        }
+    }
+
+    /* Responsive — shrink paper on small screens */
+    @@media (max-width:900px) {
+        .tmpl-shell { grid-template-columns:1fr; height:auto; }
+        .tmpl-left { max-height:300px; }
+        .tmpl-grid { grid-template-columns:repeat(3,1fr); }
+    }
+    @@media (max-width:1100px) {
+        /* Scale A4 paper down so it fits the right panel without horizontal scroll */
+        .preview-paper, .cl-preview-paper {
+            width: 90%;
+            min-height: auto;
+        }
+    }
+    @@media (max-width:600px) {
+        .tmpl-grid { grid-template-columns:repeat(2,1fr); }
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       WORKFLOW PROGRESS BAR (shared)
+    ══════════════════════════════════════════════════════════ */
+    .ciq-progress {
+        display: flex;
+        align-items: center;
+        padding: .5rem .9rem;
+        background: var(--warm-white);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+    }
+    .ciq-step {
+        display: flex;
+        align-items: center;
+        gap: .38rem;
+        flex-shrink: 0;
+    }
+    .ciq-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--border);
+        flex-shrink: 0;
+    }
+    .ciq-step-label {
+        font-size: .68rem;
+        font-weight: 600;
+        color: var(--muted);
+        font-family: var(--mono);
+        white-space: nowrap;
+    }
+    .ciq-line { flex:1; height:1px; background:var(--border); margin:0 .5rem; min-width:12px; }
+    .ciq-step.active .ciq-dot        { background: var(--accent); }
+    .ciq-step.active .ciq-step-label { color: var(--accent); }
+    .ciq-step.done   .ciq-dot        { background: var(--green); }
+    .ciq-step.done   .ciq-step-label { color: var(--green); }
+
+    /* ══════════════════════════════════════════════════════════
+       CAREER INTELLIGENCE CENTER
+    ══════════════════════════════════════════════════════════ */
+    .cic-wrap {
+        background: var(--cream);
+        padding: 1.75rem 2rem 2.5rem;
+        margin: 0 -2rem -2rem;
+        border-top: 1px solid var(--border);
+    }
+    .cic-toprow {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 1.25rem;
+        margin-bottom: 1.1rem;
+        flex-wrap: wrap;
+    }
+    .cic-title {
+        font-family: var(--serif);
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--dark);
+        margin-bottom: .18rem;
+    }
+    .cic-sub {
+        font-size: .72rem;
+        color: var(--muted);
+        font-family: var(--mono);
+    }
+    .cic-header-scores {
+        display: flex;
+        gap: .5rem;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+    .cic-score-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: .35rem;
+        padding: .24rem .7rem;
+        border-radius: 100px;
+        border: 1px solid var(--border);
+        background: #fff;
+        font-size: .7rem;
+        font-family: var(--mono);
+    }
+    .cic-score-pill .sp-label { color: var(--muted); }
+    .cic-score-pill .sp-value { font-weight: 700; color: var(--dark); }
+    .cic-score-pill.good .sp-value { color: var(--green); }
+    .cic-score-pill.warn .sp-value { color: #d97706; }
+    .cic-score-pill.bad  .sp-value { color: var(--red); }
+
+    /* Grid */
+    .cic-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: .8rem;
+    }
+
+    /* Card */
+    .cic-card {
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        overflow: hidden;
+        transition: box-shadow .15s;
+    }
+    .cic-card:hover { box-shadow: 0 2px 10px rgba(44,36,22,.07); }
+    .cic-card-head {
+        display: flex;
+        align-items: center;
+        gap: .7rem;
+        padding: .85rem 1rem;
+    }
+    .cic-card-icon {
+        width: 34px; height: 34px;
+        border-radius: 8px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: .95rem;
+        flex-shrink: 0;
+    }
+    .cic-card-info { flex: 1; min-width: 0; }
+    .cic-card-name {
+        font-size: .82rem; font-weight: 700;
+        color: var(--dark); margin-bottom: .08rem;
+        font-family: var(--sans);
+    }
+    .cic-card-desc {
+        font-size: .67rem; color: var(--muted);
+        font-family: var(--mono);
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .cic-card-score {
+        font-size: .78rem; font-weight: 700;
+        font-family: var(--mono); color: var(--muted);
+        flex-shrink: 0; min-width: 30px; text-align: center;
+    }
+    .cic-card-score.good { color: var(--green); }
+    .cic-card-score.warn { color: #d97706; }
+    .cic-card-score.bad  { color: var(--red); }
+    .cic-run-btn {
+        flex-shrink: 0;
+        padding: .36rem .8rem;
+        background: var(--dark); color: var(--cream);
+        border: none; border-radius: 7px;
+        font-size: .72rem; font-weight: 600;
+        cursor: pointer; font-family: var(--sans);
+        transition: background .14s; white-space: nowrap;
+    }
+    .cic-run-btn:hover:not(:disabled) { background: var(--charcoal); }
+    .cic-run-btn:disabled { opacity: .5; cursor: not-allowed; }
+    .cic-card-body {
+        border-top: 1px solid var(--border);
+        padding: .9rem 1rem;
+        font-size: .8rem; color: var(--charcoal);
+        line-height: 1.6; background: var(--cream);
+    }
+    .cic-sub-label {
+        font-size: .63rem; font-weight: 700;
+        text-transform: uppercase; letter-spacing: .08em;
+        color: var(--tan); font-family: var(--mono);
+        margin: .7rem 0 .32rem;
+    }
+    .cic-sub-label:first-child { margin-top: 0; }
+    .cic-tag {
+        display: inline-flex; align-items: center;
+        padding: 2px 9px; border-radius: 100px;
+        font-size: .68rem; font-weight: 600; margin: 2px;
+    }
+    .cic-tag.red    { background:#fef2f2; color:#dc2626; border:1px solid #fecaca; }
+    .cic-tag.green  { background:#dcfce7; color:#15803d; border:1px solid #86efac; }
+    .cic-tag.amber  { background:#fffbeb; color:#92400e; border:1px solid #fde68a; }
+    .cic-tag.blue   { background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; }
+    .cic-item {
+        display: flex; align-items: flex-start;
+        gap: .4rem; margin-bottom: .28rem; font-size: .78rem;
+    }
+    .cic-item-ic { flex-shrink: 0; margin-top: .12rem; font-size: .7rem; }
+    .cic-input {
+        width: 100%; padding: .42rem .7rem;
+        background: #fff; border: 1px solid var(--border);
+        border-radius: 7px; font-size: .8rem; font-family: var(--sans);
+        outline: none; transition: border-color .15s;
+        box-sizing: border-box;
+    }
+    .cic-input:focus { border-color: var(--accent); }
+
+    /* ── Workspace switcher ── */
+    .ws-switcher {
+        display: flex;
+        gap: 2px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 7px;
+        padding: 2px;
+        flex-shrink: 0;
+    }
+    .ws-btn {
+        padding: .3rem 1rem;
+        border: none;
+        background: none;
+        border-radius: 5px;
+        font-size: .75rem;
+        font-weight: 500;
+        color: var(--muted);
+        cursor: pointer;
+        font-family: var(--sans);
+        transition: all .12s;
+        white-space: nowrap;
+    }
+    .ws-btn:hover { color: var(--dark); }
+    .ws-btn.active {
+        background: #fff;
+        color: var(--dark);
+        box-shadow: 0 1px 3px rgba(0,0,0,.1);
+    }
+
+    /* ── CL sidebar ── */
+    #clSidebarContent {
+        display: none;
+        flex-direction: column;
+        flex: 1;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+    .cl-gen-head {
+        padding: .6rem 1rem;
+        border-bottom: 1px solid var(--border);
+        font-family: var(--mono);
+        font-size: .67rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .1em;
+        color: var(--tan);
+        background: var(--paper);
+        position: sticky;
+        top: 0;
+        z-index: 1;
+    }
+    .cl-section { padding: .65rem .9rem; border-bottom: 1px solid var(--border); }
+    .cl-section:last-child { border-bottom: none; }
+    .cl-field { margin-bottom: .55rem; }
+    .cl-field label {
+        display: block;
+        font-size: .63rem;
+        font-weight: 600;
+        color: var(--muted);
+        font-family: var(--mono);
+        text-transform: uppercase;
+        letter-spacing: .06em;
+        margin-bottom: .2rem;
+    }
+    .cl-field input,
+    .cl-field select,
+    .cl-field textarea {
+        width: 100%;
+        padding: .38rem .55rem;
+        background: var(--cream);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        font-size: .78rem;
+        color: var(--dark);
+        font-family: var(--sans);
+        outline: none;
+        transition: border-color .15s;
+        box-sizing: border-box;
+    }
+    .cl-field input:focus,
+    .cl-field select:focus,
+    .cl-field textarea:focus { border-color: var(--accent); background: #fff; }
+    .cl-field textarea { resize: vertical; line-height: 1.5; }
+
+    /* Chips */
+    .cl-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .3rem;
+        margin-top: .25rem;
+    }
+    .cl-chip {
+        padding: .18rem .55rem;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        background: #fff;
+        color: var(--muted);
+        font-size: .7rem;
+        font-weight: 500;
+        cursor: pointer;
+        font-family: var(--sans);
+        transition: border-color .1s, color .1s, background .1s;
+        white-space: nowrap;
+    }
+    .cl-chip:hover { border-color: var(--accent); color: var(--accent); }
+    .cl-chip.active {
+        background: var(--accent-light, #EEF2FF);
+        border-color: var(--accent);
+        color: var(--accent);
+        font-weight: 600;
+    }
+
+    /* CL template thumbs */
+    .cl-tmpl-item {
+        border: 2px solid var(--border);
+        border-radius: 8px;
+        overflow: hidden;
+        cursor: pointer;
+        transition: border-color .12s;
+        background: #fff;
+    }
+    .cl-tmpl-item:hover { border-color: var(--tan); }
+    .cl-tmpl-item.active { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(94,106,210,.15); }
+    .cl-tmpl-thumb { height: 56px; overflow: hidden; padding: 5px; }
+    .cl-tmpl-label {
+        padding: .2rem .4rem .28rem;
+        font-size: .62rem;
+        font-weight: 600;
+        color: var(--dark);
+        font-family: var(--sans);
+        background: var(--paper);
+        border-top: 1px solid var(--border);
+    }
+
+    /* Cover Letter — A4, standard business letter typography */
+    .cl-preview-paper {
+        font-family: 'Georgia', 'Times New Roman', serif;
+        font-size: 12pt;      /* standard business letter: 12pt */
+        line-height: 1.8;     /* professional line spacing */
+        color: #111;
+        padding: 25mm 20mm;   /* standard 25mm top/bottom, 20mm sides in mm */
+        background: #fff;
+        width: 210mm;         /* A4 width */
+        min-height: 297mm;    /* A4 height */
+        margin: 0 auto;
+        border-radius: 1px;
+        box-shadow:
+            0 1px 3px rgba(0,0,0,.12),
+            0 4px 16px rgba(0,0,0,.10),
+            0 12px 40px rgba(0,0,0,.08);
+        outline: none;
+        cursor: text;
+        box-sizing: border-box;
+    }
+    .cl-preview-paper:focus { outline: none; }
+
+    /* Cover letter template selector */
+    .cl-tmpl-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .4rem;
+    }
+    .cl-tmpl-btn {
+        padding: .3rem .75rem;
+        border: 1px solid var(--border);
+        border-radius: 5px;
+        background: #fff;
+        color: var(--muted);
+        font-size: .74rem;
+        font-weight: 500;
+        cursor: pointer;
+        font-family: var(--sans);
+        transition: border-color .12s, color .12s, background .12s;
+        white-space: nowrap;
+    }
+    .cl-tmpl-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .cl-tmpl-btn.active {
+        background: var(--accent-light);
+        border-color: var(--accent);
+        color: var(--accent);
+        font-weight: 600;
+    }
+
+    /* Cover letter output */
+    .cl-preview {
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 1.5rem 1.75rem;
+        font-size: .85rem;
+        line-height: 1.85;
+        color: var(--dark);
+        font-family: 'Georgia', serif;
+        white-space: pre-line;
+        outline: none;
+        min-height: 280px;
+    }
+    .cl-preview:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(94,106,210,.08); }
+
+    .cl-action-bar {
+        display: flex;
+        gap: .5rem;
+        flex-wrap: wrap;
+        align-items: center;
+        margin-top: .75rem;
+        padding-top: .75rem;
+        border-top: 1px solid var(--border);
+    }
+
+    @@media (max-width: 760px) {
+        .cic-grid { grid-template-columns: 1fr; }
+        .cic-wrap { padding: 1.25rem 1rem 2rem; margin: 0 -1rem -1rem; }
+    }
+
+    /* ── CIC Job Description Panel ── */
+    .cic-jd-panel {
+        background: #fff; border: 1px solid var(--border); border-radius: 10px;
+        padding: .9rem 1rem; margin-bottom: 1rem;
+    }
+    .cic-jd-toggle {
+        display: flex; align-items: center; justify-content: space-between;
+        cursor: pointer; user-select: none;
+    }
+    .cic-jd-toggle-label {
+        font-size: .78rem; font-weight: 600; color: var(--dark); display: flex; align-items: center; gap: .5rem;
+    }
+    .cic-jd-required-badge {
+        font-size: .65rem; font-weight: 700; background: #fef3c7; color: #d97706;
+        padding: .1rem .45rem; border-radius: 100px; font-family: var(--mono);
+    }
+    .cic-jd-body { margin-top: .75rem; display: none; }
+    .cic-jd-body.open { display: block; }
+    .cic-jd-row { display: grid; grid-template-columns: 1fr 2fr; gap: .6rem; margin-bottom: .6rem; }
+    .cic-jd-field label {
+        display: block; font-size: .62rem; font-weight: 700; text-transform: uppercase;
+        letter-spacing: .06em; color: var(--muted); font-family: var(--mono); margin-bottom: .2rem;
+    }
+    .cic-jd-field input, .cic-jd-field textarea {
+        width: 100%; padding: .38rem .55rem; background: var(--surface); border: 1px solid var(--border);
+        border-radius: 6px; font-size: .8rem; color: var(--dark); font-family: var(--sans);
+        outline: none; box-sizing: border-box; transition: border-color .15s;
+    }
+    .cic-jd-field input:focus, .cic-jd-field textarea:focus { border-color: var(--accent); background: #fff; }
+    .cic-jd-field textarea { resize: vertical; line-height: 1.5; min-height: 70px; }
+    .cic-jd-warning {
+        font-size: .74rem; color: #92400e; background: #fef3c7; border: 1px solid #fde68a;
+        border-radius: 6px; padding: .45rem .75rem; margin-top: .5rem; display: none;
+    }
+    .cic-jd-set-btn {
+        font-size: .74rem; font-weight: 600; padding: .35rem .9rem; background: var(--dark);
+        color: var(--cream); border: none; border-radius: 6px; cursor: pointer; font-family: var(--sans);
+    }
+    .cic-jd-set-btn:hover { background: var(--charcoal); }
+
+    /* ── CIC OCR Preview Panel ── */
+    .cic-ocr-panel {
+        background: #fff; border: 1px solid var(--border); border-radius: 10px;
+        padding: .9rem 1rem; margin-bottom: 1rem; display: none;
+    }
+    .cic-ocr-label { font-size: .75rem; font-weight: 600; color: var(--dark); margin-bottom: .5rem; display: flex; align-items: center; gap: .4rem; }
+    .cic-ocr-textarea {
+        width: 100%; height: 140px; padding: .5rem .7rem; background: var(--surface); border: 1px solid var(--border);
+        border-radius: 6px; font-size: .78rem; color: var(--dark); font-family: var(--mono); resize: vertical;
+        outline: none; box-sizing: border-box; line-height: 1.55;
+    }
+    .cic-ocr-textarea:focus { border-color: var(--accent); background: #fff; }
+    .cic-ocr-actions { display: flex; gap: .5rem; margin-top: .6rem; align-items: center; }
+    .cic-ocr-use-btn {
+        font-size: .74rem; font-weight: 600; padding: .35rem .9rem; background: var(--green);
+        color: #fff; border: none; border-radius: 6px; cursor: pointer; font-family: var(--sans);
+    }
+    .cic-ocr-discard-btn {
+        font-size: .74rem; font-weight: 500; padding: .33rem .8rem; background: none;
+        color: var(--muted); border: 1px solid var(--border); border-radius: 6px; cursor: pointer; font-family: var(--sans);
+    }
+    .cic-ocr-warning {
+        font-size: .72rem; color: #92400e; background: #fef3c7; border-radius: 5px;
+        padding: .3rem .6rem; font-family: var(--mono); flex: 1; display: none;
+    }
+
+    /* ── CIC Source Switcher + Upload ── */
+    .cic-source-bar {
+        display: flex; align-items: center; gap: .75rem;
+        margin-bottom: 1rem; flex-wrap: wrap;
+    }
+    .cic-src-sw {
+        display: flex; gap: 2px; background: var(--surface);
+        border: 1px solid var(--border); border-radius: 7px; padding: 2px; flex-shrink: 0;
+    }
+    .cic-src-btn {
+        padding: .28rem .85rem; border: none; background: none;
+        border-radius: 5px; font-size: .74rem; font-weight: 500;
+        color: var(--muted); cursor: pointer; font-family: var(--sans);
+        transition: all .12s; white-space: nowrap;
+    }
+    .cic-src-btn.active {
+        background: #fff; color: var(--dark); box-shadow: 0 1px 3px rgba(0,0,0,.08);
+    }
+    .cic-src-btn:hover:not(.active) { color: var(--dark); }
+    .cic-upload-zone {
+        display: flex; align-items: center; gap: .6rem; flex-wrap: wrap;
+    }
+    .cic-upload-label {
+        display: inline-flex; align-items: center; gap: .4rem;
+        padding: .3rem .8rem; border: 1px dashed var(--border); border-radius: 6px;
+        font-size: .74rem; color: var(--muted); cursor: pointer; transition: border-color .12s;
+        background: #fff; font-family: var(--sans);
+    }
+    .cic-upload-label:hover { border-color: var(--accent); color: var(--accent); }
+    .cic-upload-label input { display: none; }
+    .cic-upload-status {
+        font-size: .72rem; color: var(--muted); font-family: var(--mono);
+        max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .cic-upload-status.ok  { color: var(--green); }
+    .cic-upload-status.err { color: var(--red); }
+    .cic-src-badge {
+        display: inline-flex; align-items: center; gap: .3rem;
+        font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em;
+        padding: .18rem .55rem; border-radius: 100px; font-family: var(--mono);
+    }
+    .cic-src-badge.current  { background: #dcfce7; color: #15803d; }
+    .cic-src-badge.uploaded { background: #eff6ff; color: #1d4ed8; }
+
+    /* ── CIC Result Modal ── */
+    .cic-modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, .45);
+        z-index: 2000;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+    .cic-modal-box {
+        background: #fff;
+        border-radius: 12px;
+        max-width: 680px;
+        width: 100%;
+        max-height: 82vh;
+        overflow-y: auto;
+        padding: 0;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, .22);
+        position: relative;
+    }
+    .cic-modal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 1.25rem .85rem;
+        border-bottom: 1px solid var(--border);
+        position: sticky;
+        top: 0;
+        background: #fff;
+        z-index: 1;
+        border-radius: 12px 12px 0 0;
+    }
+    .cic-modal-title {
+        font-size: .9rem;
+        font-weight: 700;
+        color: var(--dark);
+        letter-spacing: -.01em;
+    }
+    .cic-modal-close {
+        width: 28px; height: 28px;
+        border: none; background: none;
+        cursor: pointer; border-radius: 6px;
+        font-size: .85rem; color: var(--muted);
+        display: flex; align-items: center; justify-content: center;
+        transition: background .12s, color .12s;
+        flex-shrink: 0;
+    }
+    .cic-modal-close:hover { background: var(--surface); color: var(--dark); }
+    .cic-modal-body {
+        padding: 1.1rem 1.25rem 1.4rem;
+    }
+</style>
+
+<div class="tmpl-shell">
+
+    <!-- ── TOP BAR ── -->
+    <div class="tmpl-topbar">
+        <div class="tmpl-topbar-left">
+            <div>
+                <div class="tmpl-topbar-title" id="wsTitle">CV Builder</div>
+                <div class="tmpl-topbar-sub" id="wsSubtitle">Select · Colour · Edit inline · Download</div>
+            </div>
+            <div class="active-tmpl-badge" id="activeTmplName">Nexus</div>
+        </div>
+
+        <!-- Workspace switcher -->
+        <div class="ws-switcher">
+            <button class="ws-btn active" data-ws="cv" onclick="switchWorkspace('cv')">CV Builder</button>
+            <button class="ws-btn" data-ws="cl" onclick="switchWorkspace('cl')">Cover Letter</button>
+        </div>
+
+        <div style="display:flex;gap:.45rem;align-items:center;">
+            <span class="save-status" id="saveStatus">&#10003; Saved</span>
+            <a href="/Home/CVBuilder?id=@cvRecordId" class="btn-a btn-back" style="font-size:.75rem;padding:.38rem .8rem;">
+                &#8592; Back to Edit
+            </a>
+        </div>
+    </div>
+
+    <!-- ── LEFT PANEL ── -->
+    <div class="tmpl-left">
+
+        <!-- ═══ CV WORKSPACE SIDEBAR ═══ -->
+        <div id="cvSidebarContent" style="display:flex;flex-direction:column;flex:1;overflow-y:auto;overflow-x:hidden;">
+
+            <div class="tmpl-list-head">Templates</div>
+            <div class="tmpl-grid" id="templateGrid"></div>
+
+            <!-- Accent colour -->
+            <div class="color-section">
+                <div class="color-section-head">Accent Colour</div>
+                <div class="color-dots">
+                    <div class="color-dot active" data-color="#1a1a2e" style="background:#1a1a2e;" title="Midnight"></div>
+                    <div class="color-dot" data-color="#1565c0" style="background:#1565c0;" title="Blue"></div>
+                    <div class="color-dot" data-color="#1b5e20" style="background:#1b5e20;" title="Forest"></div>
+                    <div class="color-dot" data-color="#b71c1c" style="background:#b71c1c;" title="Red"></div>
+                    <div class="color-dot" data-color="#4a148c" style="background:#4a148c;" title="Purple"></div>
+                    <div class="color-dot" data-color="#e65100" style="background:#e65100;" title="Orange"></div>
+                    <div class="color-dot" data-color="#006064" style="background:#006064;" title="Teal"></div>
+                    <div class="color-dot" data-color="#37474f" style="background:#37474f;" title="Slate"></div>
+                    <div class="color-dot" data-color="#880e4f" style="background:#880e4f;" title="Rose"></div>
+                    <div class="color-dot" data-color="#212121" style="background:#212121;" title="Black"></div>
+                    <div class="color-dot" data-color="#2e7d32" style="background:#2e7d32;" title="Green"></div>
+                    <div class="color-dot" data-color="#0277bd" style="background:#0277bd;" title="Sky"></div>
+                </div>
+                <div class="color-row">
+                    <input type="color" id="colorWheel" value="#1a1a2e" title="Custom colour" />
+                    <input type="text"  id="hexInput"   value="#1a1a2e" placeholder="#rrggbb" maxlength="7" />
+                    <span>Custom</span>
+                </div>
+            </div>
+
+            <!-- Quick edit -->
+            <div class="qe-section">
+                <div class="qe-section-head" id="qeToggle">
+                    <span>Quick Edit</span>
+                    <span id="qeArrow">&#9660;</span>
+                </div>
+                <div id="qeBody">
+                    <div class="qe-field"><label>Full Name</label><input type="text" id="qe-fullName" placeholder="Full name" /></div>
+                    <div class="qe-field"><label>Job Title</label><input type="text" id="qe-jobTitle" placeholder="Target job title" /></div>
+                    <div class="qe-field"><label>Email</label><input type="text" id="qe-email" placeholder="Email" /></div>
+                    <div class="qe-field"><label>Phone</label><input type="text" id="qe-phone" placeholder="Phone" /></div>
+                    <div class="qe-field"><label>Location</label><input type="text" id="qe-location" placeholder="City, Country" /></div>
+                    <div class="qe-field"><label>Summary</label><textarea id="qe-summary" rows="3" placeholder="Professional summary..."></textarea></div>
+                </div>
+            </div>
+
+        </div><!-- /cvSidebarContent -->
+
+        <!-- ═══ COVER LETTER WORKSPACE SIDEBAR ═══ -->
+        <div id="clSidebarContent">
+
+            <!-- CL Template selector -->
+            <div class="cl-gen-head">Letter Style</div>
+            <div class="tmpl-grid" id="clTemplateGrid" style="grid-template-columns:1fr 1fr;"></div>
+
+            <!-- Generator form -->
+            <div class="cl-gen-head">Generate</div>
+
+            <div class="cl-section">
+                <div class="cl-field">
+                    <label>Company *</label>
+                    <input type="text" id="cl-company" placeholder="e.g. Stripe" />
+                </div>
+                <div class="cl-field">
+                    <label>Role Title</label>
+                    <input type="text" id="cl-role" placeholder="Pre-filled from CV" />
+                </div>
+                <div class="cl-field">
+                    <label>Hiring Manager <span style="font-weight:400;text-transform:none;">(optional)</span></label>
+                    <input type="text" id="cl-manager" placeholder="e.g. Sarah Chen" />
+                </div>
+                <div class="cl-field">
+                    <label>Job Description</label>
+                    <textarea id="cl-jd" rows="5" placeholder="Paste the full job posting — AI will extract keywords and requirements automatically."></textarea>
+                </div>
+            </div>
+
+            <div class="cl-section">
+                <div class="cl-field">
+                    <label>Tone</label>
+                    <div class="cl-chips" id="clToneChips">
+                        <button class="cl-chip active" data-val="Professional">Professional</button>
+                        <button class="cl-chip" data-val="Friendly">Friendly</button>
+                        <button class="cl-chip" data-val="Confident">Confident</button>
+                        <button class="cl-chip" data-val="Direct">Direct</button>
+                        <button class="cl-chip" data-val="Warm">Warm</button>
+                        <button class="cl-chip" data-val="Formal">Formal</button>
+                        <button class="cl-chip" data-val="Modern">Modern</button>
+                    </div>
+                </div>
+                <div class="cl-field">
+                    <label>Type</label>
+                    <div class="cl-chips" id="clTypeChips">
+                        <button class="cl-chip active" data-val="Professional">Professional</button>
+                        <button class="cl-chip" data-val="Internship">Internship</button>
+                        <button class="cl-chip" data-val="Software Engineer">Eng</button>
+                        <button class="cl-chip" data-val="Academic">Academic</button>
+                        <button class="cl-chip" data-val="Startup">Startup</button>
+                        <button class="cl-chip" data-val="Career Change">Career Change</button>
+                        <button class="cl-chip" data-val="Short & Direct">Short</button>
+                        <button class="cl-chip" data-val="Referral-based">Referral</button>
+                        <button class="cl-chip" data-val="Entry Level">Entry Level</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="cl-section">
+                <div class="cl-field">
+                    <label>Focus Areas <span style="font-weight:400;text-transform:none;">(multi-select)</span></label>
+                    <div class="cl-chips" id="clFocusChips">
+                        <button class="cl-chip" data-val="Technical skills">Technical</button>
+                        <button class="cl-chip" data-val="Projects">Projects</button>
+                        <button class="cl-chip" data-val="Internship experience">Internship exp</button>
+                        <button class="cl-chip" data-val="Leadership">Leadership</button>
+                        <button class="cl-chip" data-val="Research">Research</button>
+                        <button class="cl-chip" data-val="Patent">Patent</button>
+                        <button class="cl-chip" data-val="Education">Education</button>
+                        <button class="cl-chip" data-val="Relocation">Relocation</button>
+                        <button class="cl-chip" data-val="Passion for company">Passion</button>
+                        <button class="cl-chip" data-val="Problem-solving">Problem-solving</button>
+                    </div>
+                </div>
+                <div class="cl-field">
+                    <label>Length</label>
+                    <div class="cl-chips" id="clLengthChips">
+                        <button class="cl-chip" data-val="Short">Short</button>
+                        <button class="cl-chip active" data-val="Standard">Standard</button>
+                        <button class="cl-chip" data-val="Detailed">Detailed</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="cl-section">
+                <div class="cl-field">
+                    <label>Why this company? <span style="font-weight:400;text-transform:none;">(optional)</span></label>
+                    <textarea id="cl-why" rows="2" placeholder="Specific reason — a product, a decision, a mission..."></textarea>
+                </div>
+                <div class="cl-field">
+                    <label>Personal note <span style="font-weight:400;text-transform:none;">(optional)</span></label>
+                    <textarea id="cl-note" rows="2" placeholder="Referral, relocation, specific project interest..."></textarea>
+                </div>
+                <button class="btn-a btn-save" id="clGenerateBtn" onclick="generateCL()"
+                    style="width:100%;justify-content:center;gap:.4rem;">
+                    Generate Cover Letter
+                </button>
+            </div>
+
+            <!-- CL Quick Edit (shown after generation) -->
+            <div id="clQuickEdit" style="display:none;">
+                <div class="cl-gen-head">Quick Edit</div>
+                <div class="cl-section">
+                    <div class="cl-field"><label>Salutation</label><input type="text" id="cle-salutation" placeholder="Dear Hiring Manager," /></div>
+                    <div class="cl-field"><label>Sign-off</label><input type="text" id="cle-signoff" placeholder="Sincerely," /></div>
+                </div>
+            </div>
+
+        </div><!-- /clSidebarContent -->
+
+    </div><!-- /tmpl-left -->
+
+    <!-- ── RIGHT PANEL ── -->
+    <div class="tmpl-right">
+
+        <!-- ═══════════ WORD-LIKE TOOLBAR ═══════════ -->
+        <div class="fmt-toolbar" id="fmtToolbar">
+
+            <!-- Group 1: Font family + size -->
+            <div class="fmt-group">
+                <select class="fmt-sel-font" id="fontFamilySel" title="Font Family">
+                    <option value="Arial">Arial</option>
+                    <option value="Calibri">Calibri</option>
+                    <option value="Times New Roman">Times New Roman</option>
+                    <option value="Georgia">Georgia</option>
+                    <option value="Garamond">Garamond</option>
+                    <option value="Verdana">Verdana</option>
+                    <option value="Trebuchet MS">Trebuchet MS</option>
+                    <option value="Tahoma">Tahoma</option>
+                    <option value="Palatino Linotype">Palatino</option>
+                    <option value="Book Antiqua">Book Antiqua</option>
+                    <option value="Century Gothic">Century Gothic</option>
+                    <option value="Courier New">Courier New</option>
+                </select>
+            </div>
+
+            <div class="fmt-group" style="gap:0;">
+                <div class="fmt-size-wrap">
+                    <input type="text" class="fmt-size-input" id="fontSizeInput" value="10" maxlength="3" title="Font size (pt)" />
+                    <div class="fmt-size-arrows">
+                        <button class="fmt-sz-btn" id="fontIncrease" title="Increase font size">&#9650;</button>
+                        <button class="fmt-sz-btn" id="fontDecrease" title="Decrease font size">&#9660;</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="fmt-sep"></div>
+
+            <!-- Group 2: Text formatting -->
+            <div class="fmt-group">
+                <button class="fmt-btn" id="fmtBold"      title="Bold (Ctrl+B)"><b>B</b></button>
+                <button class="fmt-btn" id="fmtItalic"    title="Italic (Ctrl+I)" style="font-style:italic;font-weight:400;">I</button>
+                <button class="fmt-btn" id="fmtUnderline" title="Underline (Ctrl+U)">U</button>
+                <button class="fmt-btn" id="fmtStrike"    title="Strikethrough"><s>ab</s></button>
+                <button class="fmt-btn" id="fmtSup"       title="Superscript" style="font-size:.7rem;">x<sup style="font-size:7px;vertical-align:super;">2</sup></button>
+                <button class="fmt-btn" id="fmtSub"       title="Subscript"   style="font-size:.7rem;">x<sub style="font-size:7px;vertical-align:sub;">2</sub></button>
+                <button class="fmt-btn fmt-btn-wide" id="fmtClear" title="Clear All Formatting">&#10006;A</button>
+            </div>
+
+            <div class="fmt-sep"></div>
+
+            <!-- Group 3: Text & Highlight colour -->
+            <div class="fmt-group">
+                <label class="fmt-color-wrap" title="Font Color">
+                    <span class="fmt-color-letter">A</span>
+                    <div class="fmt-color-bar" id="txtColorBar" style="background:#000;"></div>
+                    <input type="color" class="fmt-hidden-color" id="txtColorPicker" value="#000000" />
+                </label>
+                <label class="fmt-color-wrap" title="Text Highlight Color">
+                    <span class="fmt-color-letter" style="font-size:.72rem;">ab</span>
+                    <div class="fmt-color-bar" id="hlColorBar" style="background:#ffff00;"></div>
+                    <input type="color" class="fmt-hidden-color" id="hlColorPicker" value="#ffff00" />
+                </label>
+            </div>
+
+            <div class="fmt-sep"></div>
+
+            <!-- Group 4: Alignment -->
+            <div class="fmt-group">
+                <button class="fmt-btn" id="fmtAlignL" data-align="Left"   title="Align Left (Ctrl+L)">
+                    <svg width="15" height="13" viewBox="0 0 15 13" fill="currentColor">
+                        <rect x="0" y="0"  width="15" height="2" rx="1"/><rect x="0" y="4"  width="10" height="2" rx="1"/>
+                        <rect x="0" y="8"  width="15" height="2" rx="1"/><rect x="0" y="11" width="7"  height="2" rx="1"/>
+                    </svg>
+                </button>
+                <button class="fmt-btn" id="fmtAlignC" data-align="Center" title="Center (Ctrl+E)">
+                    <svg width="15" height="13" viewBox="0 0 15 13" fill="currentColor">
+                        <rect x="0"   y="0"  width="15" height="2" rx="1"/><rect x="2.5" y="4"  width="10" height="2" rx="1"/>
+                        <rect x="0"   y="8"  width="15" height="2" rx="1"/><rect x="4"   y="11" width="7"  height="2" rx="1"/>
+                    </svg>
+                </button>
+                <button class="fmt-btn" id="fmtAlignR" data-align="Right"  title="Align Right (Ctrl+R)">
+                    <svg width="15" height="13" viewBox="0 0 15 13" fill="currentColor">
+                        <rect x="0" y="0"  width="15" height="2" rx="1"/><rect x="5"   y="4"  width="10" height="2" rx="1"/>
+                        <rect x="0" y="8"  width="15" height="2" rx="1"/><rect x="8"   y="11" width="7"  height="2" rx="1"/>
+                    </svg>
+                </button>
+                <button class="fmt-btn" id="fmtAlignJ" data-align="Full"   title="Justify (Ctrl+J)">
+                    <svg width="15" height="13" viewBox="0 0 15 13" fill="currentColor">
+                        <rect x="0" y="0"  width="15" height="2" rx="1"/><rect x="0" y="4"  width="15" height="2" rx="1"/>
+                        <rect x="0" y="8"  width="15" height="2" rx="1"/><rect x="0" y="11" width="15" height="2" rx="1"/>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="fmt-sep"></div>
+
+            <!-- Group 5: Lists + Indent -->
+            <div class="fmt-group">
+                <button class="fmt-btn" id="fmtUL"      title="Bullet List" data-cmd="insertUnorderedList">
+                    <svg width="16" height="13" viewBox="0 0 16 13" fill="currentColor">
+                        <circle cx="1.4" cy="1.5" r="1.4"/><rect x="5" y="0" width="11" height="2" rx="1"/>
+                        <circle cx="1.4" cy="6.5" r="1.4"/><rect x="5" y="5" width="11" height="2" rx="1"/>
+                        <circle cx="1.4" cy="11.5" r="1.4"/><rect x="5" y="10" width="11" height="2" rx="1"/>
+                    </svg>
+                </button>
+                <button class="fmt-btn" id="fmtOL"      title="Numbered List" data-cmd="insertOrderedList">
+                    <svg width="16" height="13" viewBox="0 0 16 13" fill="currentColor">
+                        <text x="0" y="3"  font-size="4.5" font-weight="bold" font-family="Arial">1.</text>
+                        <rect x="5" y="0"  width="11" height="2" rx="1"/>
+                        <text x="0" y="8"  font-size="4.5" font-weight="bold" font-family="Arial">2.</text>
+                        <rect x="5" y="5"  width="11" height="2" rx="1"/>
+                        <text x="0" y="13" font-size="4.5" font-weight="bold" font-family="Arial">3.</text>
+                        <rect x="5" y="10" width="11" height="2" rx="1"/>
+                    </svg>
+                </button>
+                <button class="fmt-btn" id="fmtIndent"  title="Increase Indent" data-cmd="indent">
+                    <svg width="15" height="13" viewBox="0 0 15 13" fill="currentColor">
+                        <rect x="0" y="0" width="15" height="2" rx="1"/>
+                        <polygon points="0,5 5,7 0,9"/>
+                        <rect x="6" y="5"  width="9" height="2" rx="1"/>
+                        <rect x="0" y="11" width="15" height="2" rx="1"/>
+                    </svg>
+                </button>
+                <button class="fmt-btn" id="fmtOutdent" title="Decrease Indent" data-cmd="outdent">
+                    <svg width="15" height="13" viewBox="0 0 15 13" fill="currentColor">
+                        <rect x="0" y="0" width="15" height="2" rx="1"/>
+                        <polygon points="5,5 0,7 5,9"/>
+                        <rect x="6" y="5"  width="9" height="2" rx="1"/>
+                        <rect x="0" y="11" width="15" height="2" rx="1"/>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="fmt-sep"></div>
+
+            <!-- Group 6: Line spacing -->
+            <div class="fmt-group" title="Line Spacing">
+                <select class="fmt-sel-small" id="lineSpacingSel" title="Line spacing">
+                    <option value="1.2">1.2&#215;</option>
+                    <option value="1.5" selected>1.5&#215;</option>
+                    <option value="1.75">1.75&#215;</option>
+                    <option value="2.0">2.0&#215;</option>
+                </select>
+            </div>
+
+            <div class="fmt-sep"></div>
+
+            <!-- Group 7: Insert -->
+            <div class="fmt-group">
+                <button class="fmt-btn fmt-btn-wide" onclick="addTextBox()" title="Add a draggable text box anywhere on the CV"
+                        style="gap:.28rem;white-space:nowrap;">
+                    <svg width="13" height="13" viewBox="0 0 13 13" fill="currentColor">
+                        <rect x="0" y="0" width="13" height="13" rx="2" fill="none" stroke="currentColor" stroke-width="1.2"/>
+                        <rect x="3" y="5.5" width="7" height="1.2" rx=".6"/>
+                        <rect x="5.9" y="3" width="1.2" height="7" rx=".6"/>
+                    </svg>
+                    Text Box
+                </button>
+            </div>
+
+        </div><!-- end fmt-toolbar -->
+
+        <!-- ═══ CV PREVIEW ═══ -->
+        <div class="preview-area-wrap" id="previewAreaWrap">
+            <div class="preview-paper"
+                 id="cvPreviewArea"
+                 contenteditable="true"
+                 spellcheck="false">
+                <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:500px;gap:14px;text-align:center;">
+                    <div style="font-size:3rem;">&#128196;</div>
+                    <div style="font-weight:600;font-size:1rem;color:var(--dark);">Loading your CV&#8230;</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ COVER LETTER PREVIEW ═══ -->
+        <div class="preview-area-wrap" id="clPreviewWrap" style="display:none;">
+            <div class="cl-preview-paper"
+                 id="clPreviewArea"
+                 contenteditable="false"
+                 spellcheck="true">
+                <div id="clPlaceholder" style="display:flex;flex-direction:column;align-items:flex-start;justify-content:center;min-height:540px;padding:0 8px;">
+
+                    <div style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);font-family:var(--mono);margin-bottom:1rem;">How it works</div>
+
+                    <div style="display:flex;flex-direction:column;gap:1.1rem;max-width:380px;">
+
+                        <div style="display:flex;gap:.9rem;align-items:flex-start;">
+                            <div style="width:24px;height:24px;border-radius:50%;background:var(--accent);color:#fff;font-size:.72rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">1</div>
+                            <div>
+                                <div style="font-size:.84rem;font-weight:600;color:var(--dark);margin-bottom:.18rem;">Select a letter style</div>
+                                <div style="font-size:.76rem;color:var(--muted);line-height:1.55;">Pick from Classic, Modern, Minimal, Executive, or any of the 8 styles in the left panel under <strong>Letter Style</strong>.</div>
+                            </div>
+                        </div>
+
+                        <div style="display:flex;gap:.9rem;align-items:flex-start;">
+                            <div style="width:24px;height:24px;border-radius:50%;background:var(--accent);color:#fff;font-size:.72rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">2</div>
+                            <div>
+                                <div style="font-size:.84rem;font-weight:600;color:var(--dark);margin-bottom:.18rem;">Fill in the Generate panel</div>
+                                <div style="font-size:.76rem;color:var(--muted);line-height:1.55;">Enter the <strong>Company name</strong> and paste the <strong>Job Description</strong>. The rest (your name, role, skills) is auto-filled from your CV.</div>
+                            </div>
+                        </div>
+
+                        <div style="display:flex;gap:.9rem;align-items:flex-start;">
+                            <div style="width:24px;height:24px;border-radius:50%;background:var(--accent);color:#fff;font-size:.72rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">3</div>
+                            <div>
+                                <div style="font-size:.84rem;font-weight:600;color:var(--dark);margin-bottom:.18rem;">Choose tone and focus areas</div>
+                                <div style="font-size:.76rem;color:var(--muted);line-height:1.55;">Pick a tone (Professional, Confident, Direct…) and select focus areas like Technical, Projects, or Leadership.</div>
+                            </div>
+                        </div>
+
+                        <div style="display:flex;gap:.9rem;align-items:flex-start;">
+                            <div style="width:24px;height:24px;border-radius:50%;background:var(--accent);color:#fff;font-size:.72rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">4</div>
+                            <div>
+                                <div style="font-size:.84rem;font-weight:600;color:var(--dark);margin-bottom:.18rem;">Click Generate Cover Letter</div>
+                                <div style="font-size:.76rem;color:var(--muted);line-height:1.55;">Your letter appears here. <strong>Click anywhere in the letter to edit it directly</strong> — just like a word processor. Use the toolbar above for formatting.</div>
+                            </div>
+                        </div>
+
+                        <div style="display:flex;gap:.9rem;align-items:flex-start;">
+                            <div style="width:24px;height:24px;border-radius:50%;background:var(--green);color:#fff;font-size:.72rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">5</div>
+                            <div>
+                                <div style="font-size:.84rem;font-weight:600;color:var(--dark);margin-bottom:.18rem;">Save · Download · Copy</div>
+                                <div style="font-size:.76rem;color:var(--muted);line-height:1.55;">Use the buttons below to download as PDF or DOCX, or copy the full text to clipboard.</div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div style="margin-top:1.75rem;padding:.75rem 1rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;font-size:.76rem;color:var(--muted);line-height:1.6;max-width:380px;">
+                        <strong style="color:var(--dark);">Tip:</strong> Paste the full job description for the best results — the AI extracts keywords and matches them to your CV automatically.
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ CV ACTION BAR ═══ -->
+        <div class="tmpl-action-bar" id="cvActionBar">
+            <button class="btn-a btn-save" id="saveBtn" onclick="saveCV()">
+                &#128190; Save
+            </button>
+            <button class="btn-a btn-pdf" id="dlPdfBtn" onclick="dlPdf()">
+                &#128196; PDF
+            </button>
+            <button class="btn-a btn-docx" id="dlDocxBtn" onclick="dlDocx()">
+                &#127381; DOCX
+            </button>
+            <button class="btn-a btn-png" id="dlPngBtn" onclick="dlPng()">
+                &#128247; PNG
+            </button>
+            <a href="/Home/CVBuilder?id=@cvRecordId" class="btn-a btn-edit">
+                &#9998; Edit Form
+            </a>
+        </div>
+
+        <!-- ═══ COVER LETTER ACTION BAR ═══ -->
+        <div class="tmpl-action-bar" id="clActionBar" style="display:none;">
+            <button class="btn-a btn-save" id="clSaveBtn" onclick="saveCL()">
+                &#128190; Save
+            </button>
+            <button class="btn-a btn-pdf" id="clPdfBtn" onclick="dlCLPdf()">
+                &#128196; PDF
+            </button>
+            <button class="btn-a btn-docx" id="clDocxBtn" onclick="dlCLDocx()">
+                &#127381; DOCX
+            </button>
+            <button class="btn-a btn-png" id="clPngBtn" onclick="dlCLPng()">
+                &#128247; PNG
+            </button>
+            <button class="btn-a btn-back" id="clCopyBtn" onclick="clCopyText()" style="margin-left:auto;">
+                &#128203; Copy
+            </button>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     CAREER INTELLIGENCE CENTER
+     Appears after the user selects a template for the first time.
+════════════════════════════════════════════════════════════════ -->
+<div class="cic-wrap" id="cicSection" style="display:none;">
+
+    <!-- Header -->
+    <div class="cic-toprow">
+        <div>
+            <div class="cic-title">Career Intelligence Center</div>
+            <div class="cic-sub" id="cicSubtitle">AI-powered tools to finalize and optimize your career documents</div>
+        </div>
+        <div class="cic-header-scores">
+            <div class="cic-score-pill" id="cic-score-ats">
+                <span class="sp-label">ATS</span>
+                <span class="sp-value" id="cic-val-ats">—</span>
+            </div>
+            <div class="cic-score-pill" id="cic-score-job">
+                <span class="sp-label">Job Match</span>
+                <span class="sp-value" id="cic-val-job">—</span>
+            </div>
+            <div class="cic-score-pill" id="cic-score-health">
+                <span class="sp-label">Health</span>
+                <span class="sp-value" id="cic-val-health">—</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Job Description Panel -->
+    <div class="cic-jd-panel">
+        <div class="cic-jd-toggle" onclick="cicToggleJdPanel()">
+            <span class="cic-jd-toggle-label">
+                &#128196; Job Description
+                <span class="cic-jd-required-badge">Required for ATS &amp; Job Match</span>
+            </span>
+            <span id="cicJdArrow" style="font-size:.72rem;color:var(--muted);">&#9660;</span>
+        </div>
+        <div class="cic-jd-body" id="cicJdBody">
+            <div class="cic-jd-row">
+                <div class="cic-jd-field">
+                    <label>Job Title *</label>
+                    <input type="text" id="cicJdTitle" placeholder="e.g. Software Engineer"
+                           oninput="cicOnJdChange()" />
+                </div>
+                <div class="cic-jd-field">
+                    <label>Company (optional)</label>
+                    <input type="text" id="cicJdCompany" placeholder="e.g. Google" />
+                </div>
+            </div>
+            <div class="cic-jd-field">
+                <label>Job Description * (paste full posting for accurate analysis)</label>
+                <textarea id="cicJdText" rows="4" placeholder="Paste the full job description here…"
+                          oninput="cicOnJdChange()"></textarea>
+            </div>
+            <div class="cic-jd-warning" id="cicJdWarning">
+                &#9888; ATS Analysis and Job Match Analysis require a Job Description.
+                Without it, only general feedback is available.
+            </div>
+            <div style="margin-top:.5rem;">
+                <button class="cic-jd-set-btn" onclick="cicJdConfirm()">&#10003; Apply Job Description</button>
+                <span id="cicJdConfirmed" style="font-size:.72rem;color:var(--green);font-family:var(--mono);margin-left:.6rem;display:none;">Applied &#10003;</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- OCR Extracted Text Review Panel (shown after image upload) -->
+    <div class="cic-ocr-panel" id="cicOcrPanel">
+        <div class="cic-ocr-label">
+            &#128247; Extracted text — review and edit before analysis
+        </div>
+        <textarea class="cic-ocr-textarea" id="cicOcrTextarea" placeholder="Extracted text will appear here…"></textarea>
+        <div class="cic-ocr-actions">
+            <button class="cic-ocr-use-btn" onclick="cicApplyOcrText()">Use for Analysis</button>
+            <button class="cic-ocr-discard-btn" onclick="cicDiscardOcr()">Discard</button>
+            <span class="cic-ocr-warning" id="cicOcrWarning">&#9888; OCR confidence may be low — review carefully</span>
+        </div>
+    </div>
+
+    <!-- Source switcher + upload -->
+    <div class="cic-source-bar">
+        <div class="cic-src-sw">
+            <button class="cic-src-btn active" id="cicSrcCurrentBtn" onclick="cicSetSource('current')">
+                &#128196; Current Document
+            </button>
+            <button class="cic-src-btn" id="cicSrcUploadBtn" onclick="cicSetSource('uploaded')">
+                &#128228; Uploaded Document
+            </button>
+        </div>
+        <div class="cic-upload-zone" id="cicUploadZone" style="display:none;">
+            <label class="cic-upload-label">
+                <input type="file" id="cicFileInput" accept=".pdf,.docx,.txt,.png,.jpg,.jpeg,.webp" onchange="cicHandleUpload(this)" />
+                &#128206; Choose PDF, DOCX, or TXT
+            </label>
+            <span class="cic-upload-status" id="cicUploadStatus">No file selected</span>
+        </div>
+        <span class="cic-src-badge current" id="cicSrcBadge">Analyzing: Current CV</span>
+    </div>
+
+    <!-- Progress indicator -->
+    <div class="ciq-progress" style="margin-bottom:1.25rem;">
+        <div class="ciq-step done">
+            <div class="ciq-dot"></div>
+            <span class="ciq-step-label">CV Created</span>
+        </div>
+        <div class="ciq-line"></div>
+        <div class="ciq-step done">
+            <div class="ciq-dot"></div>
+            <span class="ciq-step-label">Template Selected</span>
+        </div>
+        <div class="ciq-line"></div>
+        <div class="ciq-step" id="cic-step-analysis">
+            <div class="ciq-dot"></div>
+            <span class="ciq-step-label">Analysis Complete</span>
+        </div>
+        <div class="ciq-line"></div>
+        <div class="ciq-step" id="cic-step-export">
+            <div class="ciq-dot"></div>
+            <span class="ciq-step-label">Export Ready</span>
+        </div>
+    </div>
+
+    <!-- Cards grid -->
+    <div class="cic-grid">
+
+        <!-- 1. ATS Analysis -->
+        <div class="cic-card">
+            <div class="cic-card-head">
+                <div class="cic-card-icon" style="background:#fef2f2;">&#127919;</div>
+                <div class="cic-card-info">
+                    <div class="cic-card-name">ATS Analysis</div>
+                    <div class="cic-card-desc">Score · Keywords · Optimization suggestions</div>
+                </div>
+                <span class="cic-card-score" id="cic-s-ats">—</span>
+                <button class="cic-run-btn" id="cic-btn-ats" onclick="cicRun('ats')">Analyze</button>
+            </div>
+            <div class="cic-card-body" id="cic-body-ats" style="display:none;"></div>
+        </div>
+
+        <!-- 2. Job Match Analysis -->
+        <div class="cic-card">
+            <div class="cic-card-head">
+                <div class="cic-card-icon" style="background:#eff6ff;">&#128269;</div>
+                <div class="cic-card-info">
+                    <div class="cic-card-name">Job Match Analysis</div>
+                    <div class="cic-card-desc">Match % · Missing skills · Required technologies</div>
+                </div>
+                <span class="cic-card-score" id="cic-s-job">—</span>
+                <button class="cic-run-btn" id="cic-btn-job" onclick="cicRun('job')">Analyze</button>
+            </div>
+            <div class="cic-card-body" id="cic-body-job" style="display:none;">
+                <div class="cic-sub-label">Job Description</div>
+                <textarea id="cic-jobdesc" class="cic-input" rows="3"
+                    style="resize:vertical;line-height:1.5;"
+                    placeholder="Paste the job description for a tailored match analysis…"></textarea>
+                <button class="cic-run-btn" style="margin-top:.6rem;" onclick="cicRunJobMatch()">Run Match Analysis</button>
+                <div id="cic-body-job-result" style="margin-top:.75rem;"></div>
+            </div>
+        </div>
+
+        <!-- 3. CV Health Report -->
+        <div class="cic-card">
+            <div class="cic-card-head">
+                <div class="cic-card-icon" style="background:#f0fdf4;">&#9989;</div>
+                <div class="cic-card-info">
+                    <div class="cic-card-name">CV Health Report</div>
+                    <div class="cic-card-desc">Completeness · Readability · Bullet quality</div>
+                </div>
+                <span class="cic-card-score" id="cic-s-health">—</span>
+                <button class="cic-run-btn" id="cic-btn-health" onclick="cicRun('health')">Analyze</button>
+            </div>
+            <div class="cic-card-body" id="cic-body-health" style="display:none;"></div>
+        </div>
+
+        <!-- 4. Recruiter Review -->
+        <div class="cic-card">
+            <div class="cic-card-head">
+                <div class="cic-card-icon" style="background:#faf5ff;">&#128101;</div>
+                <div class="cic-card-info">
+                    <div class="cic-card-name">Recruiter Review</div>
+                    <div class="cic-card-desc">Strengths · Weaknesses · Hiring probability</div>
+                </div>
+                <span class="cic-card-score" id="cic-s-rec">—</span>
+                <button class="cic-run-btn" id="cic-btn-rec" onclick="cicRun('recruiter')">Analyze</button>
+            </div>
+            <div class="cic-card-body" id="cic-body-rec" style="display:none;"></div>
+        </div>
+
+        <!-- 5. Interview Preparation -->
+        <div class="cic-card">
+            <div class="cic-card-head">
+                <div class="cic-card-icon" style="background:#f0fdf4;">&#127908;</div>
+                <div class="cic-card-info">
+                    <div class="cic-card-name">Interview Preparation</div>
+                    <div class="cic-card-desc">Technical · Behavioral · Project questions</div>
+                </div>
+                <span class="cic-card-score" id="cic-s-iq"></span>
+                <button class="cic-run-btn" id="cic-btn-iq" onclick="cicRun('interview')">Generate</button>
+            </div>
+            <div class="cic-card-body" id="cic-body-iq" style="display:none;"></div>
+        </div>
+
+        <!-- 6. LinkedIn Generator -->
+        <div class="cic-card">
+            <div class="cic-card-head">
+                <div class="cic-card-icon" style="background:#eff6ff;">&#128279;</div>
+                <div class="cic-card-info">
+                    <div class="cic-card-name">LinkedIn Generator</div>
+                    <div class="cic-card-desc">Headline · About section · Experience rewrite</div>
+                </div>
+                <span class="cic-card-score" id="cic-s-li"></span>
+                <button class="cic-run-btn" id="cic-btn-li" onclick="cicRun('linkedin')">Generate</button>
+            </div>
+            <div class="cic-card-body" id="cic-body-li" style="display:none;"></div>
+        </div>
+
+        <!-- 7. Cover Letter Review -->
+        <div class="cic-card">
+            <div class="cic-card-head">
+                <div class="cic-card-icon" style="background:#F5F3FF;">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <rect x="1.5" y="1.5" width="13" height="13" rx="2" stroke="#5E6AD2" stroke-width="1.3"/>
+                        <path d="M4 5.5h8M4 8h6M4 10.5h4" stroke="#5E6AD2" stroke-width="1.3" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <div class="cic-card-info">
+                    <div class="cic-card-name">Cover Letter Review</div>
+                    <div class="cic-card-desc">Tone · Keywords · Clarity · Improvements</div>
+                </div>
+                <span class="cic-card-score" id="cic-s-cl-review">—</span>
+                <button class="cic-run-btn" id="cic-btn-cl-review" onclick="cicReviewCoverLetter()">Review</button>
+            </div>
+            <div class="cic-card-body" id="cic-body-cl-review" style="display:none;"></div>
+        </div>
+
+        <!-- 8. Resume Optimizer -->
+        <div class="cic-card">
+            <div class="cic-card-head">
+                <div class="cic-card-icon" style="background:#fefce8;">&#10024;</div>
+                <div class="cic-card-info">
+                    <div class="cic-card-name">Resume Optimizer</div>
+                    <div class="cic-card-desc">Improve summary · Experience · Bullet impact</div>
+                </div>
+                <span class="cic-card-score" id="cic-s-opt"></span>
+                <button class="cic-run-btn" id="cic-btn-opt" onclick="cicRun('optimizer')">Optimize</button>
+            </div>
+            <div class="cic-card-body" id="cic-body-opt" style="display:none;"></div>
+        </div>
+
+    </div><!-- /cic-grid -->
+</div><!-- /cicSection -->
+
+<!-- ── CIC Result Modal ── -->
+<div id="cicModal" class="cic-modal-overlay" onclick="cicCloseModal(event)">
+    <div class="cic-modal-box" onclick="event.stopPropagation()">
+        <div class="cic-modal-header">
+            <span class="cic-modal-title" id="cicModalTitle"></span>
+            <button class="cic-modal-close" onclick="cicForceClose()" title="Close">&#10005;</button>
+        </div>
+        <div class="cic-modal-body" id="cicModalBody"></div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" crossorigin="anonymous"></script>
+    <script src="~/js/cv-templates.js" asp-append-version="true"></script>
+    <script src="~/js/cl-workspace.js" asp-append-version="true"></script>
+    <script src="~/js/career-intelligence.js" asp-append-version="true"></script>
+    <script>
+        _cvRecordId = "@cvRecordId";
+
+        document.addEventListener("DOMContentLoaded", function () {
+
+            // Quick edit toggle
+            var qh = document.getElementById("qeToggle");
+            var qb = document.getElementById("qeBody");
+            var qa = document.getElementById("qeArrow");
+            if (qh && qb) {
+                qh.addEventListener("click", function () {
+                    var open = qb.style.display !== "none";
+                    qb.style.display = open ? "none" : "block";
+                    if (qa) qa.style.transform = open ? "rotate(-90deg)" : "rotate(0deg)";
+                });
+            }
+
+            // Hook template selection → reveal Career Intelligence Center
+            var _origSelect = window.selectTemplate;
+            window.selectTemplate = function (id) {
+                if (_origSelect) _origSelect(id);
+                initCIC();
+            };
+        });
+    </script>
+}

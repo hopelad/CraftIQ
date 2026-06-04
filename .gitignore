@@ -1,0 +1,32 @@
+# Build output
+bin/
+obj/
+
+# Database
+*.db
+*.db-shm
+*.db-wal
+
+# Secrets — do NOT commit these
+appsettings.json
+appsettings.*.json
+!appsettings.example.json
+
+# User secrets
+secrets.json
+
+# Playwright browsers
+.playwright/
+
+# VS / Rider
+.vs/
+.idea/
+*.user
+*.suo
+
+# dotnet tools
+.config/
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,708 @@
+﻿@{
+    ViewData["Title"] = "CraftIQ — AI for Developers";
+    Layout = "_LandingLayout";
+}
+
+<style>
+    /* ── Dark navy page base ── */
+    body { background: #0F172A; }
+
+    /* ── Hero ── */
+    .hero {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 6rem 2.5rem 5rem;
+        display: grid;
+        grid-template-columns: 1.1fr 1fr;
+        gap: 5rem;
+        align-items: center;
+    }
+
+    .hero-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: .55rem;
+        font-family: var(--mono);
+        font-size: .68rem;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+        color: #818CF8;
+        margin-bottom: 1.75rem;
+    }
+    .hero-eyebrow::before {
+        content: '';
+        display: inline-block;
+        width: 24px;
+        height: 1px;
+        background: #818CF8;
+    }
+
+    .hero-title {
+        font-family: var(--sans);
+        font-weight: 800;
+        font-size: clamp(2.4rem, 4.5vw, 3.6rem);
+        line-height: 1.1;
+        color: #F8FAFC;
+        letter-spacing: -.04em;
+        margin-bottom: 1.4rem;
+    }
+    .hero-title .line-accent {
+        display: block;
+        color: #818CF8;
+        font-style: normal;
+        position: relative;
+    }
+    .hero-title .line-accent::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 1px;
+        background: linear-gradient(90deg, rgba(129,140,248,.4), transparent);
+    }
+
+    .hero-desc {
+        font-size: .925rem;
+        color: #94A3B8;
+        line-height: 1.8;
+        max-width: 400px;
+        margin-bottom: 2.25rem;
+        border-left: 2px solid rgba(255,255,255,.08);
+        padding-left: 1rem;
+    }
+
+    .hero-cta {
+        display: flex;
+        gap: .75rem;
+        flex-wrap: wrap;
+        align-items: center;
+        margin-bottom: 2.25rem;
+    }
+
+    .btn-primary {
+        display: inline-flex;
+        align-items: center;
+        gap: .45rem;
+        padding: .75rem 1.6rem;
+        background: var(--accent);
+        color: #fff;
+        border-radius: 8px;
+        font-weight: 500;
+        font-size: .88rem;
+        text-decoration: none;
+        transition: background .15s;
+        font-family: var(--sans);
+        letter-spacing: -.01em;
+    }
+    .btn-primary:hover { background: var(--accent-hover); color: #fff; }
+
+    .btn-secondary {
+        display: inline-flex;
+        align-items: center;
+        gap: .45rem;
+        padding: .75rem 1.6rem;
+        border: 1px solid rgba(255,255,255,.12);
+        border-radius: 8px;
+        font-weight: 500;
+        font-size: .88rem;
+        color: #94A3B8;
+        text-decoration: none;
+        background: rgba(255,255,255,.04);
+        transition: border-color .15s, color .15s;
+        font-family: var(--sans);
+        letter-spacing: -.01em;
+    }
+    .btn-secondary:hover { border-color: rgba(255,255,255,.25); color: #E2E8F0; }
+
+    .hero-trust {
+        display: flex;
+        align-items: center;
+        gap: .85rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid rgba(255,255,255,.07);
+    }
+
+    .avatars { display: flex; }
+
+    .av {
+        width: 30px; height: 30px;
+        border-radius: 50%;
+        border: 2px solid #0F172A;
+        background: #1E293B;
+        margin-left: -8px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: .6rem; font-weight: 600; color: #94A3B8;
+    }
+    .av:first-child { margin-left: 0; }
+
+    .trust-txt {
+        font-size: .78rem;
+        color: #64748B;
+        line-height: 1.4;
+    }
+    .trust-txt strong { color: #94A3B8; display: block; }
+
+    /* ── Hero right ── */
+    .hero-right {
+        position: relative;
+    }
+
+    .hero-window {
+        background: #1c1812;
+        border-radius: 18px;
+        overflow: hidden;
+        box-shadow: 0 0 0 1px rgba(255,255,255,.06), 0 32px 64px rgba(44,36,22,.22), 0 8px 24px rgba(44,36,22,.12);
+    }
+
+    .hw-bar {
+        background: #141210;
+        padding: .75rem 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: .85rem;
+        border-bottom: 1px solid rgba(255,255,255,.05);
+    }
+
+    .hw-dots {
+        display: flex;
+        gap: .4rem;
+    }
+
+    .hw-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+    }
+
+    .hw-tab {
+        font-family: var(--mono);
+        font-size: .7rem;
+        color: rgba(255,255,255,.35);
+        background: rgba(255,255,255,.04);
+        border-radius: 5px;
+        padding: .15rem .6rem;
+    }
+
+        .hw-tab.active {
+            color: rgba(255,255,255,.7);
+            background: rgba(255,255,255,.08);
+        }
+
+    .hw-body {
+        padding: 1.4rem 1.6rem;
+    }
+
+    .cl {
+        font-family: var(--mono);
+        font-size: .76rem;
+        line-height: 1.85;
+        display: block;
+    }
+
+    .c-cmt {
+        color: #5a5248;
+    }
+
+    .c-kw {
+        color: #c8a97e;
+    }
+
+    .c-fn {
+        color: #89b4ca;
+    }
+
+    .c-str {
+        color: #a3be8c;
+    }
+
+    .c-num {
+        color: #d08770;
+    }
+
+    .c-txt {
+        color: #cdd6f4;
+    }
+
+    .c-op {
+        color: #94e2d5;
+    }
+
+    .hw-divider {
+        height: 1px;
+        background: rgba(255,255,255,.05);
+        margin: .6rem 0;
+    }
+
+    /* ── Floating tags ── */
+    .ftag {
+        position: absolute;
+        background: #1E293B;
+        border: 1px solid rgba(255,255,255,.1);
+        border-radius: 8px;
+        padding: .48rem .85rem;
+        display: flex;
+        align-items: center;
+        gap: .5rem;
+        font-size: .76rem;
+        font-weight: 500;
+        color: #CBD5E1;
+        box-shadow: 0 4px 16px rgba(0,0,0,.3);
+        animation: ftFloat 4s ease-in-out infinite;
+        white-space: nowrap;
+    }
+
+    .ftag-ico {
+        width: 22px; height: 22px;
+        border-radius: 5px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: .7rem;
+    }
+
+    .ft1 {
+        top: -18px;
+        right: -10px;
+        animation-delay: 0s;
+    }
+
+    .ft2 {
+        bottom: 50px;
+        right: -20px;
+        animation-delay: 1.3s;
+    }
+
+    .ft3 {
+        bottom: -16px;
+        left: 16px;
+        animation-delay: .65s;
+    }
+
+    @@keyframes ftFloat {
+        0%, 100% {
+            transform: translateY(0);
+        }
+
+        50% {
+            transform: translateY(-8px);
+        }
+    }
+
+    /* ── Section divider ── */
+    .section-divider {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 0 2.5rem;
+        border-top: 1px solid rgba(255,255,255,.06);
+    }
+
+    /* ── Features (light section) ── */
+    .features {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 5rem 2.5rem;
+    }
+
+    .features-top {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+        margin-bottom: 3rem;
+    }
+
+    .features-label {
+        font-family: var(--mono);
+        font-size: .67rem;
+        letter-spacing: .14em;
+        text-transform: uppercase;
+        color: #818CF8;
+        margin-bottom: .6rem;
+    }
+
+    .features-title {
+        font-weight: 800;
+        font-size: 1.9rem;
+        color: #F1F5F9;
+        letter-spacing: -.03em;
+        line-height: 1.2;
+    }
+    .features-title em { font-style: normal; color: #818CF8; }
+
+    .features-desc { font-size: .86rem; color: #64748B; max-width: 320px; line-height: 1.7; }
+
+    .feat-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1rem; }
+
+    .feat-card {
+        background: #1E293B;
+        border: 1px solid rgba(255,255,255,.06);
+        border-radius: 12px;
+        padding: 1.5rem;
+        transition: border-color .15s;
+        position: relative;
+        overflow: hidden;
+    }
+    .feat-card:hover { border-color: rgba(129,140,248,.3); }
+    .feat-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; opacity:0; transition:opacity .2s; }
+    .feat-card:hover::before { opacity:1; }
+    .fc-purple::before { background: var(--accent); }
+    .fc-green::before  { background: var(--green); }
+    .fc-amber::before  { background: var(--amber); }
+
+    .feat-ico {
+        width: 40px; height: 40px;
+        border-radius: 9px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1rem; margin-bottom: 1rem;
+    }
+
+    .feat-name { font-weight: 700; font-size: .95rem; color: #F1F5F9; margin-bottom: .45rem; letter-spacing: -.01em; }
+    .feat-text { font-size: .82rem; color: #64748B; line-height: 1.7; margin-bottom: .9rem; }
+    .feat-link {
+        font-size: .78rem; font-weight: 500; text-decoration: none;
+        display: inline-flex; align-items: center; gap: .3rem; color: #818CF8;
+        transition: gap .15s;
+    }
+    .feat-link:hover { gap: .5rem; }
+
+    /* ── How it works (dark section) ── */
+    .how { background: #111827; padding: 5rem 2.5rem; }
+    .how-inner { max-width: 1180px; margin: 0 auto; }
+    .how-header { text-align: center; margin-bottom: 4rem; }
+    .how-label { font-family:var(--mono); font-size:.67rem; letter-spacing:.14em; text-transform:uppercase; color:#818CF8; margin-bottom:.6rem; }
+    .how-title { font-weight:800; font-size:1.9rem; color:#F1F5F9; letter-spacing:-.03em; }
+    .how-title em { font-style:normal; color:#818CF8; }
+
+    .steps { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; position:relative; }
+    .steps::before {
+        content:''; position:absolute;
+        top:28px; left:22%; right:22%; height:1px;
+        background: repeating-linear-gradient(90deg, rgba(129,140,248,.25) 0, rgba(129,140,248,.25) 6px, transparent 6px, transparent 14px);
+    }
+    .step-card {
+        background: #1E293B;
+        border: 1px solid rgba(255,255,255,.06);
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+        transition: border-color .15s;
+    }
+    .step-card:hover { border-color: rgba(129,140,248,.25); }
+    .step-circle {
+        width: 44px; height: 44px; border-radius: 50%;
+        border: 1px solid rgba(129,140,248,.3);
+        color: #818CF8; font-weight: 700; font-size: 1rem;
+        display: flex; align-items: center; justify-content: center;
+        margin: 0 auto 1.1rem;
+    }
+    .step-emoji { font-size: 1.5rem; margin-bottom: .75rem; }
+    .step-name { font-weight: 700; font-size: .9rem; color: #F1F5F9; margin-bottom: .35rem; }
+    .step-desc { font-size: .8rem; color: #475569; line-height: 1.6; }
+
+    /* ── Stats (dark) ── */
+    .stats {
+        background: #0F172A;
+        border-top: 1px solid rgba(255,255,255,.06);
+        border-bottom: 1px solid rgba(255,255,255,.06);
+        padding: 2.75rem 2.5rem;
+    }
+    .stats-inner { max-width:1180px; margin:0 auto; display:grid; grid-template-columns:repeat(4,1fr); gap:2rem; }
+    .stat-item { display:flex; align-items:flex-start; gap:.85rem; }
+    .stat-ico {
+        width:38px; height:38px; border-radius:9px;
+        background:#1E293B; border:1px solid rgba(255,255,255,.07);
+        display:flex; align-items:center; justify-content:center;
+        font-size:.9rem; flex-shrink:0;
+    }
+    .stat-name { font-weight:700; font-size:.85rem; color:#E2E8F0; margin-bottom:.2rem; }
+    .stat-desc { font-size:.76rem; color:#475569; line-height:1.5; }
+
+    /* ── CTA banner ── */
+    .cta-banner { max-width:1180px; margin:5rem auto; padding:0 2.5rem; }
+    .cta-inner {
+        background: #1E293B;
+        border: 1px solid rgba(255,255,255,.07);
+        border-radius: 16px;
+        padding: 3rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 2rem;
+        flex-wrap: wrap;
+        position: relative;
+        overflow: hidden;
+    }
+    .cta-inner::before { display:none; }
+    .cta-inner::after  { display:none; }
+    .cta-text { position:relative; z-index:1; }
+    .cta-label { font-family:var(--mono); font-size:.67rem; letter-spacing:.14em; text-transform:uppercase; color:#818CF8; margin-bottom:.6rem; }
+    .cta-title { font-weight:800; font-size:1.6rem; color:#F1F5F9; letter-spacing:-.03em; line-height:1.25; max-width:420px; }
+    .cta-title em { font-style:normal; color:#818CF8; }
+
+    .cta-actions {
+        display: flex;
+        gap: .85rem;
+        flex-wrap: wrap;
+        position: relative;
+        z-index: 1;
+    }
+
+    .cta-btn-light {
+        display: inline-flex;
+        align-items: center;
+        gap: .45rem;
+        padding: .8rem 1.6rem;
+        background: var(--cream);
+        color: var(--dark);
+        border-radius: 10px;
+        font-weight: 500;
+        font-size: .9rem;
+        text-decoration: none;
+        transition: all .2s;
+        border: none;
+        font-family: var(--sans);
+        box-shadow: 0 2px 12px rgba(0,0,0,.2);
+    }
+
+        .cta-btn-light:hover {
+            background: #fff;
+            transform: translateY(-1px);
+            color: var(--dark);
+        }
+
+    .cta-btn-outline {
+        display: inline-flex;
+        align-items: center;
+        gap: .45rem;
+        padding: .8rem 1.6rem;
+        background: transparent;
+        border: 1px solid rgba(255,255,255,.15);
+        border-radius: 10px;
+        font-weight: 500;
+        font-size: .9rem;
+        color: rgba(255,255,255,.75);
+        text-decoration: none;
+        transition: all .2s;
+        font-family: var(--sans);
+    }
+
+        .cta-btn-outline:hover {
+            border-color: rgba(255,255,255,.3);
+            color: #fff;
+        }
+
+    @@media (max-width: 960px) {
+        .hero {
+            grid-template-columns: 1fr;
+            gap: 3rem;
+        }
+
+        .hero-right {
+            display: none;
+        }
+
+        .feat-grid, .steps, .stats-inner {
+            grid-template-columns: 1fr;
+        }
+
+            .steps::before {
+                display: none;
+            }
+
+        .cta-inner {
+            flex-direction: column;
+        }
+
+        .features-top {
+            flex-direction: column;
+        }
+    }
+</style>
+
+<!-- ── Hero ── -->
+<section class="hero" id="home">
+    <div>
+        <div class="hero-eyebrow">AI workspace for developers</div>
+        <h1 class="hero-title">
+            Build cleaner code<br>
+            and stronger<br>
+            <span class="line-accent">applications.</span>
+        </h1>
+        <p class="hero-desc">
+            Refactor C/C++ code, detect code smells, and craft
+            professional CVs & cover letters — all in one
+            thoughtfully designed workspace.
+        </p>
+        <div class="hero-cta">
+            <a href="/Home/Login" class="btn-primary">Get started free →</a>
+            <a href="#features" class="btn-secondary">▶ See features</a>
+        </div>
+        <div class="hero-trust">
+            <div class="avatars">
+                <div class="av">AH</div>
+                <div class="av">MK</div>
+                <div class="av">SR</div>
+                <div class="av">TJ</div>
+            </div>
+            <div class="trust-txt">
+                <strong>5,000+ developers</strong>
+                trust CraftIQ worldwide
+            </div>
+        </div>
+    </div>
+
+    <div class="hero-right">
+        <div class="hero-window">
+            <div class="hw-bar">
+                <div class="hw-dots">
+                    <div class="hw-dot" style="background:#ff5f57"></div>
+                    <div class="hw-dot" style="background:#febc2e"></div>
+                    <div class="hw-dot" style="background:#28c840"></div>
+                </div>
+                <span class="hw-tab active">main.cpp</span>
+                <span class="hw-tab">refactored.cpp</span>
+            </div>
+            <div class="hw-body">
+                <span class="cl c-cmt">// Before — 4 code smells detected</span>
+                <span class="cl c-kw">int <span class="c-fn">main</span><span class="c-txt">() {</span></span>
+                <span class="cl c-txt">&nbsp;&nbsp;int n,i,s=<span class="c-num">0</span>;</span>
+                <span class="cl c-txt">&nbsp;&nbsp;<span class="c-kw">for</span>(i=<span class="c-num">1</span>;i&lt;=n;i++) s+=i;</span>
+                <span class="cl c-fn">&nbsp;&nbsp;printf<span class="c-txt">(<span class="c-str">"%d"</span>,s);</span></span>
+                <span class="cl c-txt">}</span>
+                <div class="hw-divider"></div>
+                <span class="cl c-cmt">// After — clean, readable, validated</span>
+                <span class="cl c-kw">int <span class="c-fn">main</span><span class="c-txt">() {</span></span>
+                <span class="cl c-txt">&nbsp;&nbsp;int count = <span class="c-num">0</span>, sum = <span class="c-num">0</span>;</span>
+                <span class="cl c-txt">&nbsp;&nbsp;<span class="c-kw">for</span> (int i = <span class="c-num">1</span>; i &lt;= count; <span class="c-op">++</span>i)</span>
+                <span class="cl c-txt">&nbsp;&nbsp;&nbsp;&nbsp;sum += i;</span>
+                <span class="cl c-fn">&nbsp;&nbsp;printf<span class="c-txt">(<span class="c-str">"Sum = %d\n"</span>, sum);</span></span>
+                <span class="cl c-kw">&nbsp;&nbsp;return <span class="c-num">0</span>;</span>
+                <span class="cl c-txt">}</span>
+            </div>
+        </div>
+        <div class="ftag ft1">
+            <div class="ftag-ico" style="background:var(--accent-light);">&lt;/&gt;</div>
+            Refactor Tool
+        </div>
+        <div class="ftag ft2">
+            <div class="ftag-ico" style="background:var(--green-light);">📄</div>
+            CV Builder
+        </div>
+        <div class="ftag ft3">
+            <div class="ftag-ico" style="background:#fef3c7;">✉</div>
+            Cover Letter
+        </div>
+    </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ── Features ── -->
+<section class="features" id="features">
+    <div class="features-top">
+        <div>
+            <div class="features-label">What CraftIQ offers</div>
+            <h2 class="features-title">Three tools,<br>one <em>workspace.</em></h2>
+        </div>
+        <p class="features-desc">
+            Each tool is designed to do one thing exceptionally well,
+            and they all live in the same clean interface.
+        </p>
+    </div>
+    <div class="feat-grid">
+        <div class="feat-card fc-purple">
+            <div class="feat-ico" style="background:var(--accent-light);">&lt;/&gt;</div>
+            <div class="feat-name">Refactor Tool</div>
+            <div class="feat-text">
+                Paste C/C++ code and receive a clean, readable refactored
+                version with detailed explanations and a full code smell report.
+            </div>
+            <a href="/Home/Login" class="feat-link" style="color:var(--accent);">
+                Try it now →
+            </a>
+        </div>
+        <div class="feat-card fc-green">
+            <div class="feat-ico" style="background:var(--green-light);">📄</div>
+            <div class="feat-name">CV Writer</div>
+            <div class="feat-text">
+                Build a professional CV with AI-guided structure. Highlight
+                your skills, experience and achievements in minutes.
+            </div>
+            <a href="/Home/Login" class="feat-link" style="color:var(--green);">
+                Try it now →
+            </a>
+        </div>
+        <div class="feat-card fc-amber">
+            <div class="feat-ico" style="background:#fef3c7;">✉</div>
+            <div class="feat-name">Cover Letter Writer</div>
+            <div class="feat-text">
+                Generate natural, personalized cover letters tailored to each
+                role. Stand out without the blank-page dread.
+            </div>
+            <a href="/Home/Login" class="feat-link" style="color:#b45309;">
+                Try it now →
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- ── How it works ── -->
+<section class="how" id="how-it-works">
+    <div class="how-inner">
+        <div class="how-header">
+            <div class="how-label">Simple process</div>
+            <h2 class="how-title">From input to output, <em>in seconds.</em></h2>
+        </div>
+        <div class="steps">
+            <div class="step-card">
+                <div class="step-circle">1</div>
+                <div class="step-emoji">🖱</div>
+                <div class="step-name">Choose a tool</div>
+                <div class="step-desc">
+                    Pick Refactor Tool or CV & Cover Letter Writer from your dashboard.
+                </div>
+            </div>
+            <div class="step-card">
+                <div class="step-circle">2</div>
+                <div class="step-emoji">📝</div>
+                <div class="step-name">Provide content</div>
+                <div class="step-desc">
+                    Paste your code or fill in your experience details.
+                    More context means better results.
+                </div>
+            </div>
+            <div class="step-card">
+                <div class="step-circle">3</div>
+                <div class="step-emoji">✨</div>
+                <div class="step-name">Receive AI output</div>
+                <div class="step-desc">
+                    Get clean, intelligent results in seconds,
+                    ready to use or export.
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ── Stats ── -->
+<div class="stats" id="stats">
+    <div class="stats-inner">
+        <div class="stat-item">
+            <div class="stat-ico">🧠</div>
+            <div>
+                <div class="stat-name">AI-Powered</div>
+                <div class="stat-desc">Advanced models deliver accurate, thoughtful results every time.</div>
+            </div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-ico">⚡</div>
+            <div>
+                <div class="stat-name">Fast</div>
+                <div class="stat-desc">Results in seconds, not minutes. Built for developer pace.</div>
+            </div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-ico">😊</div>
+            <div>
+                <div class="stat-name">Easy to use</div>
+                <div class="stat-desc">Clean, minimal interface that stays out of your way.</div>
